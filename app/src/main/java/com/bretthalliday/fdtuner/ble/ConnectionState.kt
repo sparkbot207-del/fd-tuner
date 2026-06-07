@@ -6,4 +6,5 @@ sealed class ConnectionState {
     data class Connecting(val deviceName: String) : ConnectionState()
     data class Connected(val deviceName: String, val deviceAddress: String) : ConnectionState()
     data class Error(val message: String) : ConnectionState()
+    object Demo : ConnectionState()
 }

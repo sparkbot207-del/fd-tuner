@@ -25,6 +25,10 @@ class ScanViewModel(private val bleManager: FardriverBleManager) : ViewModel() {
         bleManager.connect(device)
     }
 
+    fun startDemo() {
+        bleManager.startDemo()
+    }
+
     override fun onCleared() {
         super.onCleared()
         bleManager.stopScan()

@@ -349,6 +349,29 @@ class FardriverBleManager(private val context: Context) {
         _telemetry.value = telData
     }
 
+    // ---- Demo mode ----
+
+    fun startDemo() {
+        disconnect()
+        DemoDataSource.start()
+        _connectionState.value = ConnectionState.Demo
+        scope.launch {
+            DemoDataSource.telemetry.collect { _telemetry.value = it }
+        }
+        scope.launch {
+            DemoDataSource.rawParams.collect { _rawParams.value = it }
+        }
+    }
+
+    fun stopDemo() {
+        DemoDataSource.stop()
+        _connectionState.value = ConnectionState.Disconnected
+        _rawParams.value = emptyMap()
+        _telemetry.value = null
+    }
+
+    val isDemo get() = _connectionState.value == ConnectionState.Demo
+
     fun cleanup() {
         scope.cancel()
         try {

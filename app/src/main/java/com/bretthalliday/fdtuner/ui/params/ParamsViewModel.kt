@@ -20,7 +20,10 @@ class ParamsViewModel(private val bleManager: FardriverBleManager) : ViewModel()
      * Write a new value to a param, performing read-modify-write for bit-packed params.
      * Returns true on success.
      */
+    val isDemo: Boolean get() = bleManager.isDemo
+
     fun writeParam(param: ParamDef, displayValue: Int) {
+        if (bleManager.isDemo) return  // No writes in demo mode
         val addr = param.addr ?: return
         viewModelScope.launch {
             val currentRaw = bleManager.rawParams.value[addr] ?: 0

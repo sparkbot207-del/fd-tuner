@@ -94,6 +94,9 @@ class MainActivity : AppCompatActivity() {
             is ConnectionState.Error -> {
                 binding.toolbar.subtitle = "Error: ${state.message}"
             }
+            is ConnectionState.Demo -> {
+                binding.toolbar.subtitle = "⚡ DEMO MODE"
+            }
         }
     }
 

@@ -85,6 +85,10 @@ class ScanFragment : Fragment() {
             checkPermissionsAndScan()
         }
 
+        binding.btnDemo.setOnClickListener {
+            viewModel.startDemo()
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
@@ -121,6 +125,11 @@ class ScanFragment : Fragment() {
                 binding.tvStatus.text = getString(R.string.scan_connecting, state.deviceName)
             }
             is ConnectionState.Connected -> {
+                binding.btnScan.isEnabled = true
+                binding.progressScan.visibility = View.GONE
+                findNavController().navigate(R.id.action_scan_to_main)
+            }
+            is ConnectionState.Demo -> {
                 binding.btnScan.isEnabled = true
                 binding.progressScan.visibility = View.GONE
                 findNavController().navigate(R.id.action_scan_to_main)
