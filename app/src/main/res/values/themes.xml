@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.FDTuner" parent="Theme.Material3.Dark">
+    <style name="Theme.FDTuner" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/orange_primary</item>
         <item name="colorPrimaryVariant">@color/orange_dark</item>
         <item name="colorOnPrimary">@color/bg_dark</item>
@@ -15,12 +15,6 @@
         <item name="android:statusBarColor">@color/bg_surface</item>
         <item name="android:navigationBarColor">@color/bg_surface</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="actionBarStyle">@style/Widget.FDTuner.ActionBar</item>
-    </style>
-
-    <style name="Widget.FDTuner.ActionBar" parent="Widget.AppCompat.ActionBar">
-        <item name="background">@color/bg_surface</item>
-        <item name="titleTextStyle">@style/TextAppearance.FDTuner.Title</item>
     </style>
 
     <style name="TextAppearance.FDTuner.Title" parent="TextAppearance.AppCompat.Title">
