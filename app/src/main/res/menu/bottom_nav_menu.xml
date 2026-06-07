@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_settings"
         android:title="@string/nav_settings" />
 
+    <item
+        android:id="@+id/errorCodesFragment"
+        android:icon="@drawable/ic_error"
+        android:title="Errors" />
+
 </menu>
