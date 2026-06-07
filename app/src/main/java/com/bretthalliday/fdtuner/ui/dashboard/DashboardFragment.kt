@@ -39,6 +39,10 @@ class DashboardFragment : Fragment() {
                 }
             }
         }
+
+        binding.btnDisconnect.setOnClickListener {
+            viewModel.disconnect()
+        }
     }
 
     private fun updateDashboard(t: TelemetryData?) {

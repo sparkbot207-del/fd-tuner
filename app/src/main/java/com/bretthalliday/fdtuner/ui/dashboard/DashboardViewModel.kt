@@ -9,4 +9,9 @@ class DashboardViewModel(private val bleManager: FardriverBleManager) : ViewMode
 
     val telemetry: StateFlow<TelemetryData?> = bleManager.telemetry
     val rawParams: StateFlow<Map<Int, Int>> = bleManager.rawParams
+
+    fun disconnect() {
+        if (bleManager.isDemo) bleManager.stopDemo()
+        else bleManager.disconnect()
+    }
 }
