@@ -1,6 +1,7 @@
 package com.bretthalliday.fdtuner.data
 
 import android.content.Context
+import org.json.JSONException
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -90,6 +91,49 @@ object ProfileManager {
 
     fun profileExists(ctx: Context, name: String, isDemo: Boolean = false): Boolean =
         name in loadIndex(prefs(ctx, isDemo))
+
+    // ---- Feature 4: Export / Import ----
+
+    /**
+     * Serialize a SavedProfile to a pretty-printed JSON string suitable for sharing.
+     */
+    fun exportToJson(profile: SavedProfile): String {
+        val paramsJson = JSONObject().apply {
+            profile.params.forEach { (addr, value) -> put(addr.toString(), value) }
+        }
+        return JSONObject().apply {
+            put("name", profile.name)
+            put("savedAt", profile.savedAt)
+            put("isDemo", profile.isDemo)
+            put("paramCount", profile.paramCount)
+            put("params", paramsJson)
+        }.toString(2) // indent = 2 for pretty print
+    }
+
+    /**
+     * Parse a JSON string (from exportToJson) back into a SavedProfile.
+     * Returns null if the JSON is malformed or missing required fields.
+     * Uses [isDemo] to set the profile's demo flag regardless of what's in the JSON
+     * (ensures the profile lands in the correct store on import).
+     */
+    fun importFromJson(ctx: Context, json: String, isDemo: Boolean): SavedProfile? {
+        return try {
+            val obj = JSONObject(json)
+            val name = obj.optString("name").takeIf { it.isNotBlank() } ?: return null
+            val paramsJson = obj.optJSONObject("params") ?: return null
+            val params = parseParams(paramsJson)
+            if (params.isEmpty()) return null
+            SavedProfile(
+                name = name,
+                paramCount = params.size,
+                savedAt = obj.optString("savedAt", DATE_FMT.format(Date())),
+                params = params,
+                isDemo = isDemo
+            )
+        } catch (e: JSONException) {
+            null
+        }
+    }
 
     private fun loadIndex(p: android.content.SharedPreferences): Set<String> =
         p.getString(KEY_INDEX, "")

@@ -1,12 +1,17 @@
 package com.bretthalliday.fdtuner.ui.profiles
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -16,12 +21,15 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bretthalliday.fdtuner.R
 import com.bretthalliday.fdtuner.data.ProfileManager
 import com.bretthalliday.fdtuner.data.SavedProfile
 import com.bretthalliday.fdtuner.databinding.FragmentProfilesBinding
 import com.bretthalliday.fdtuner.databinding.ItemProfileBinding
 import com.bretthalliday.fdtuner.ui.params.ParamsViewModel
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
+import java.io.File
 
 class ProfilesFragment : Fragment() {
 
@@ -29,6 +37,13 @@ class ProfilesFragment : Fragment() {
     private val binding get() = _binding!!
     private val paramsViewModel: ParamsViewModel by activityViewModels()
     private lateinit var adapter: ProfileAdapter
+
+    // Feature 4: import launcher
+    private val importLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { handleImport(it) }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProfilesBinding.inflate(inflater, container, false)
@@ -40,12 +55,18 @@ class ProfilesFragment : Fragment() {
 
         adapter = ProfileAdapter(
             onLoad = { profile -> confirmLoad(profile) },
-            onDelete = { profile -> confirmDelete(profile) }
+            onDelete = { profile -> confirmDelete(profile) },
+            onExport = { profile -> exportProfile(profile) }
         )
         binding.recyclerProfiles.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerProfiles.adapter = adapter
 
         binding.btnSaveProfile.setOnClickListener { showSaveDialog() }
+
+        // Feature 4: import FAB
+        binding.fabImportProfile.setOnClickListener {
+            importLauncher.launch("application/json")
+        }
 
         refreshList()
 
@@ -205,6 +226,66 @@ class ProfilesFragment : Fragment() {
         }
     }
 
+    // ---- Feature 4: export/import ----
+
+    private fun exportProfile(profile: SavedProfile) {
+        val json = ProfileManager.exportToJson(profile)
+        val fileName = "${profile.name.replace("[^a-zA-Z0-9_-]".toRegex(), "_")}.json"
+        val file = File(requireContext().cacheDir, fileName)
+        file.writeText(json)
+
+        val uri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.provider",
+            file
+        )
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/json"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_SUBJECT, "Fardriver profile: ${profile.name}")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivity(Intent.createChooser(shareIntent, "Export Profile"))
+    }
+
+    private fun handleImport(uri: Uri) {
+        try {
+            val json = requireContext().contentResolver.openInputStream(uri)?.use {
+                it.bufferedReader().readText()
+            } ?: run {
+                Snackbar.make(binding.root, "Could not read file", Snackbar.LENGTH_LONG).show()
+                return
+            }
+
+            val inDemo = paramsViewModel.isDemo
+            val profile = ProfileManager.importFromJson(requireContext(), json, isDemo = inDemo)
+            if (profile == null) {
+                Snackbar.make(binding.root, "Import failed: invalid profile JSON", Snackbar.LENGTH_LONG).show()
+                return
+            }
+
+            val exists = ProfileManager.profileExists(requireContext(), profile.name, isDemo = inDemo)
+            if (exists) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Overwrite Profile?")
+                    .setMessage("Profile '${profile.name}' already exists. Overwrite?")
+                    .setPositiveButton("Overwrite") { _, _ ->
+                        ProfileManager.save(requireContext(), profile.name, profile.params, isDemo = inDemo)
+                        Snackbar.make(binding.root, "Profile '${profile.name}' imported", Snackbar.LENGTH_LONG).show()
+                        refreshList()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            } else {
+                ProfileManager.save(requireContext(), profile.name, profile.params, isDemo = inDemo)
+                Snackbar.make(binding.root, "Profile '${profile.name}' imported", Snackbar.LENGTH_LONG).show()
+                refreshList()
+            }
+        } catch (e: Exception) {
+            Snackbar.make(binding.root, "Import error: ${e.message}", Snackbar.LENGTH_LONG).show()
+        }
+    }
+
     private fun confirmDelete(profile: SavedProfile) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Profile?")
@@ -231,7 +312,8 @@ private val PROFILE_DIFF = object : DiffUtil.ItemCallback<SavedProfile>() {
 
 class ProfileAdapter(
     private val onLoad: (SavedProfile) -> Unit,
-    private val onDelete: (SavedProfile) -> Unit
+    private val onDelete: (SavedProfile) -> Unit,
+    private val onExport: (SavedProfile) -> Unit = {}
 ) : ListAdapter<SavedProfile, ProfileAdapter.VH>(PROFILE_DIFF) {
 
     inner class VH(private val b: ItemProfileBinding) : RecyclerView.ViewHolder(b.root) {
@@ -241,6 +323,21 @@ class ProfileAdapter(
             b.tvProfileIcon.text = if (profile.isDemo) "⚡" else "💾"
             b.btnLoad.setOnClickListener { onLoad(profile) }
             b.btnDelete.setOnClickListener { onDelete(profile) }
+            // Feature 4: long-press shows Export / Delete popup
+            b.root.setOnLongClickListener { view ->
+                val popup = PopupMenu(view.context, view)
+                popup.menu.add(0, 1, 0, "Export")
+                popup.menu.add(0, 2, 1, "Delete")
+                popup.setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        1 -> { onExport(profile); true }
+                        2 -> { onDelete(profile); true }
+                        else -> false
+                    }
+                }
+                popup.show()
+                true
+            }
         }
     }
 
