@@ -149,4 +149,10 @@ object DemoDataSource {
         val updated = HashMap(_rawParams.value).apply { put(addr, value) }
         _rawParams.value = updated
     }
+
+    /** Merge an entire map into the demo params in one shot — no race conditions. */
+    fun bulkUpdateParams(params: Map<Int, Int>) {
+        val updated = HashMap(_rawParams.value).apply { putAll(params) }
+        _rawParams.value = updated
+    }
 }

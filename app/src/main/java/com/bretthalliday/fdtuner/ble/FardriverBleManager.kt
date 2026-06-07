@@ -401,9 +401,14 @@ class FardriverBleManager(private val context: Context) {
 
     /** Update a single param in the local map (demo mode only). */
     fun updateDemoParam(addr: Int, value: Int) {
-        val updated = HashMap(_rawParams.value).apply { put(addr, value) }
-        _rawParams.value = updated
         DemoDataSource.updateParam(addr, value)
+        // _rawParams will update via the collect in startDemo()
+    }
+
+    /** Merge an entire profile map in one shot — avoids race with the collect coroutine. */
+    fun bulkUpdateDemoParams(params: Map<Int, Int>) {
+        DemoDataSource.bulkUpdateParams(params)
+        // Single emission from DemoDataSource.rawParams feeds _rawParams via collect
     }
 
     fun cleanup() {

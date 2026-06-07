@@ -174,12 +174,10 @@ class ProfilesFragment : Fragment() {
             return
         }
 
-        // Demo mode: apply params directly to local map, no BLE write needed
+        // Demo mode: bulk-apply all params in one shot to avoid race with collect coroutine
         if (inDemo) {
-            params.forEach { (addr, value) ->
-                (requireActivity() as? com.bretthalliday.fdtuner.MainActivity)
-                    ?.bleManager?.updateDemoParam(addr, value)
-            }
+            (requireActivity() as? com.bretthalliday.fdtuner.MainActivity)
+                ?.bleManager?.bulkUpdateDemoParams(params)
             Toast.makeText(requireContext(), "⚡ Demo profile \"${profile.name}\" loaded", Toast.LENGTH_SHORT).show()
             return
         }
