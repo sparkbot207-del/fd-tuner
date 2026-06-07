@@ -32,7 +32,7 @@
     </style>
 
     <!-- Dialog style -->
-    <style name="Theme.FDTuner.Dialog" parent="ThemeOverlay.MaterialComponents.Dark.Dialog">
+    <style name="Theme.FDTuner.Dialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="colorPrimary">@color/orange_primary</item>
         <item name="colorSurface">@color/bg_surface</item>
         <item name="colorOnSurface">@color/text_primary</item>
