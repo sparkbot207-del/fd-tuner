@@ -32,6 +32,14 @@ class FardriverBleManager(private val context: Context) {
         private val SERVICE_UUID = UUID.fromString(FardriverProtocol.SERVICE_UUID)
         private val CHAR_UUID = UUID.fromString(FardriverProtocol.CHARACTERISTIC_UUID)
         private val CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+
+        // Known BLE module name fragments used by FarDriver controllers.
+        // HM-10/BT05 modules default to CONTROLDM; ND prefix is common on ND-series;
+        // HMSoft/BT05 are the underlying module names. Add the exact name from nRF Connect
+        // as the first entry once you've confirmed it.
+        val FARDRIVER_NAME_PATTERNS = listOf(
+            "CONTROLDM", "FD-", "ND", "FARDRIVER", "CONTROL", "HMSoft", "BT05"
+        )
     }
 
     // ---- Public state flows ----
@@ -133,27 +141,34 @@ class FardriverBleManager(private val context: Context) {
         }
     }
 
-    private fun buildScanFilters(): List<ScanFilter> {
-        val byService = ScanFilter.Builder()
-            .setServiceUuid(ParcelUuid(SERVICE_UUID))
-            .build()
-        return listOf(byService)
-    }
+    // No pre-filter: FarDriver BT modules (HM-10/BT05) advertise by name only and
+    // do NOT include the service UUID in advertisement packets. A UUID hardware filter
+    // silently drops them before onScanResult fires. We filter by name pattern in
+    // onScanResult instead, after the OS delivers results.
+    private fun buildScanFilters(): List<ScanFilter> = emptyList()
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
-            val name = device.name ?: return
-            if (!name.startsWith("FD-", ignoreCase = true)) return
+            val name = device.name ?: return // still skip completely unnamed devices
+
+            val likelyFardriver = FARDRIVER_NAME_PATTERNS.any {
+                name.contains(it, ignoreCase = true)
+            }
 
             val entry = ScannedDevice(
                 name = name,
                 address = device.address,
                 rssi = result.rssi,
-                device = device
+                device = device,
+                likelyFardriver = likelyFardriver
             )
             scannedDeviceMap[device.address] = entry
-            _scannedDevices.value = scannedDeviceMap.values.sortedByDescending { it.rssi }
+            _scannedDevices.value = scannedDeviceMap.values
+                .sortedWith(
+                    compareByDescending<ScannedDevice> { it.likelyFardriver }
+                        .thenByDescending { it.rssi }
+                )
             _connectionState.value = ConnectionState.Scanning(scannedDeviceMap.size)
         }
 
@@ -454,5 +469,6 @@ data class ScannedDevice(
     val name: String,
     val address: String,
     val rssi: Int,
-    val device: BluetoothDevice
+    val device: BluetoothDevice,
+    val likelyFardriver: Boolean = false
 )

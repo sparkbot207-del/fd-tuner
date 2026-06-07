@@ -184,7 +184,8 @@ class ScanFragment : Fragment() {
 
         inner class VH(private val b: ItemScanDeviceBinding) : RecyclerView.ViewHolder(b.root) {
             fun bind(device: ScannedDevice) {
-                b.tvDeviceName.text = device.name
+                // ⚡ badge on likely FarDriver controllers so they're easy to spot
+                b.tvDeviceName.text = if (device.likelyFardriver) "⚡ ${device.name}" else device.name
                 b.tvDeviceAddress.text = device.address
                 b.tvRssi.text = "${device.rssi} dBm"
                 b.btnConnect.setOnClickListener { onConnect(device) }
