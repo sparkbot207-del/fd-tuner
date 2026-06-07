@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary accent: Fardriver orange -->
+    <color name="orange_primary">#FF6600</color>
+    <color name="orange_dark">#CC5200</color>
+
+    <!-- Dark theme backgrounds -->
+    <color name="bg_dark">#111111</color>
+    <color name="bg_surface">#1E1E1E</color>
+    <color name="bg_elevated">#2A2A2A</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9E9E9E</color>
+    <color name="text_hint">#616161</color>
+
+    <!-- Status / indicators -->
+    <color name="soc_green">#4CAF50</color>
+    <color name="regen_blue">#2196F3</color>
+    <color name="error_red">#F44336</color>
+    <color name="warning_yellow">#FFC107</color>
+
+    <!-- UI elements -->
+    <color name="divider">#2C2C2C</color>
+    <color name="bottom_nav_active">@color/orange_primary</color>
+    <color name="bottom_nav_inactive">#757575</color>
+</resources>

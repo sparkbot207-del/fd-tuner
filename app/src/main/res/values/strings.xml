@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FD Tuner</string>
+
+    <!-- Scan screen -->
+    <string name="scan_start">Scan for Controllers</string>
+    <string name="scan_stop">Stop Scanning</string>
+    <string name="scan_tap_to_scan">Tap to scan for Fardriver controllers</string>
+    <string name="scan_found_devices">Scanning… %1$d device(s) found</string>
+    <string name="scan_connecting">Connecting to %1$s…</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_params">Parameters</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Params -->
+    <string name="params_connect_to_read">Connect to read</string>
+    <string name="params_addr_unknown">Address unknown</string>
+    <string name="params_writing">Writing…</string>
+
+    <!-- Settings -->
+    <string name="settings_speed_units">Speed Units</string>
+    <string name="settings_pole_pairs">Pole Pairs</string>
+    <string name="settings_wheel_circumference">Wheel Circumference (mm)</string>
+    <string name="settings_disconnect">Disconnect</string>
+</resources>
