@@ -49,14 +49,6 @@ class ParamsSectionFragment : Fragment() {
             if (sectionName == ParamDefinitions.SECTION_PID) View.VISIBLE else View.GONE
 
         paramAdapter = ParamAdapter { param ->
-            if (viewModel.isDemo) {
-                android.widget.Toast.makeText(
-                    requireContext(),
-                    "Demo mode — connect to a real controller to write params",
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
-                return@ParamAdapter
-            }
             if (param.isWritable) {
                 ParamEditDialog.show(
                     fragment = this,

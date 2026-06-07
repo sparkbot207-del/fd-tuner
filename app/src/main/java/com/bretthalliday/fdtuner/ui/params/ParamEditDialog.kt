@@ -107,11 +107,11 @@ object ParamEditDialog {
                         "${param.name}\n\n" +
                         "Current: $currentDisplay ${param.unit}\n" +
                         "New:     $newDisplayStr ${param.unit}\n\n" +
-                        if (param.isSafetyCritical) "⚠️ Safety-critical — are you sure?" else "Write this value to the controller?"
+                        if (param.isSafetyCritical) "⚠️ Safety-critical — are you sure?" else "Apply this value?"
                     )
-                    .setPositiveButton("Write") { _, _ ->
+                    .setPositiveButton("Apply") { _, _ ->
                         onConfirm(rawInt)
-                        Toast.makeText(context, "Writing ${param.name}…", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "${param.name} updated", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
                     }
                     .setNegativeButton("Cancel", null)

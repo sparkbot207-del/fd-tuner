@@ -399,6 +399,13 @@ class FardriverBleManager(private val context: Context) {
 
     val isDemo get() = _connectionState.value == ConnectionState.Demo
 
+    /** Update a single param in the local map (demo mode only). */
+    fun updateDemoParam(addr: Int, value: Int) {
+        val updated = HashMap(_rawParams.value).apply { put(addr, value) }
+        _rawParams.value = updated
+        DemoDataSource.updateParam(addr, value)
+    }
+
     fun cleanup() {
         scope.cancel()
         try {

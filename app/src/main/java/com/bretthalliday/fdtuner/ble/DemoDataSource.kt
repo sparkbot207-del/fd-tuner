@@ -143,4 +143,10 @@ object DemoDataSource {
     }
 
     val isRunning get() = job?.isActive == true
+
+    /** Update a single param in the demo map (reflects immediately in UI). */
+    fun updateParam(addr: Int, value: Int) {
+        val updated = HashMap(_rawParams.value).apply { put(addr, value) }
+        _rawParams.value = updated
+    }
 }

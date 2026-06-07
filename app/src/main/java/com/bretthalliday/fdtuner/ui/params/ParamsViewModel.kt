@@ -23,12 +23,16 @@ class ParamsViewModel(private val bleManager: FardriverBleManager) : ViewModel()
     val isDemo: Boolean get() = bleManager.isDemo
 
     fun writeParam(param: ParamDef, displayValue: Int) {
-        if (bleManager.isDemo) return  // No writes in demo mode
         val addr = param.addr ?: return
         viewModelScope.launch {
             val currentRaw = bleManager.rawParams.value[addr] ?: 0
             val newRaw = param.packValue(currentRaw, displayValue)
-            bleManager.writeParam(addr, newRaw)
+            if (bleManager.isDemo) {
+                // Demo mode: update local map only, no BLE write
+                bleManager.updateDemoParam(addr, newRaw)
+            } else {
+                bleManager.writeParam(addr, newRaw)
+            }
         }
     }
 
