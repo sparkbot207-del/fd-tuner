@@ -48,6 +48,29 @@ class FardriverBleManager(private val context: Context) {
     private val _telemetry = MutableStateFlow<TelemetryData?>(null)
     val telemetry: StateFlow<TelemetryData?> = _telemetry
 
+    // ---- Session Snapshot (Feature 2) ----
+
+    private var sessionSnapshot: Map<Int, Int>? = null
+    private val _snapshotAvailable = MutableStateFlow(false)
+    val snapshotAvailable: StateFlow<Boolean> = _snapshotAvailable
+
+    fun takeSessionSnapshot() {
+        sessionSnapshot = HashMap(_rawParams.value)
+        _snapshotAvailable.value = sessionSnapshot!!.isNotEmpty()
+    }
+
+    fun hasSnapshot(): Boolean = sessionSnapshot != null && sessionSnapshot!!.isNotEmpty()
+
+    suspend fun restoreSnapshot(): Boolean {
+        val snap = sessionSnapshot ?: return false
+        return writeAllParams(snap)
+    }
+
+    fun clearSnapshot() {
+        sessionSnapshot = null
+        _snapshotAvailable.value = false
+    }
+
     // ---- Settings (written by SettingsFragment) ----
 
     var polePairs: Int = 4
@@ -156,6 +179,7 @@ class FardriverBleManager(private val context: Context) {
     }
 
     fun disconnect() {
+        clearSnapshot()
         scope.launch {
             gattMutex.withLock {
                 try {
@@ -175,6 +199,8 @@ class FardriverBleManager(private val context: Context) {
     // ---- Write param ----
 
     suspend fun writeParam(addr: Int, value: Int): Boolean {
+        // Feature 2: capture snapshot before the very first write of this session
+        if (sessionSnapshot == null) takeSessionSnapshot()
         val pkt = FardriverProtocol.buildWritePacket(addr, value)
         return writeRaw(pkt)
     }
@@ -391,6 +417,7 @@ class FardriverBleManager(private val context: Context) {
     }
 
     fun stopDemo() {
+        clearSnapshot()
         DemoDataSource.stop()
         _connectionState.value = ConnectionState.Disconnected
         _rawParams.value = emptyMap()

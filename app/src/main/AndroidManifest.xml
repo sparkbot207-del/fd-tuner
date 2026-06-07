@@ -14,6 +14,10 @@
 
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
 
+    <!-- Foreground service for BLE connection management -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,6 +25,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FDTuner">
+
+        <service
+            android:name=".ble.BleConnectionService"
+            android:foregroundServiceType="connectedDevice"
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
