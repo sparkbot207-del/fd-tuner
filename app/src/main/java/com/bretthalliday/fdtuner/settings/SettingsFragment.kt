@@ -88,6 +88,28 @@ class SettingsFragment : Fragment() {
             }
         }
 
+        // ---- Feature 6: Alert settings ----
+        binding.switchAlertsEnabled.isChecked = prefs.getBoolean("alerts_enabled", true)
+        binding.switchAlertsEnabled.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("alerts_enabled", isChecked).apply()
+        }
+
+        val savedMotorTemp = prefs.getInt("alert_motor_temp", 80)
+        binding.etAlertMotorTemp.setText(savedMotorTemp.toString())
+        binding.etAlertMotorTemp.addTextChangedListener { text ->
+            text?.toString()?.toIntOrNull()?.let { v ->
+                if (v in 30..200) prefs.edit().putInt("alert_motor_temp", v).apply()
+            }
+        }
+
+        val savedBattLow = prefs.getFloat("alert_batt_low", 60.0f)
+        binding.etAlertBattLow.setText(savedBattLow.toString())
+        binding.etAlertBattLow.addTextChangedListener { text ->
+            text?.toString()?.toFloatOrNull()?.let { v ->
+                if (v in 20.0f..120.0f) prefs.edit().putFloat("alert_batt_low", v).apply()
+            }
+        }
+
         // ---- About ----
         binding.tvAppVersion.text = "Fardriver Whisperer v${BuildConfig.VERSION_NAME}"
         binding.tvAppNotes.text =

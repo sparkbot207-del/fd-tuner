@@ -1,6 +1,7 @@
 package com.bretthalliday.fdtuner.ui.dashboard
 
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.bretthalliday.fdtuner.MainActivity
+import com.bretthalliday.fdtuner.ble.AlertMonitor
+import com.bretthalliday.fdtuner.ble.ConnectionState
 import com.bretthalliday.fdtuner.databinding.FragmentDashboardBinding
 import com.bretthalliday.fdtuner.model.TelemetryData
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class DashboardFragment : Fragment() {
@@ -42,6 +47,33 @@ class DashboardFragment : Fragment() {
 
         binding.btnDisconnect.setOnClickListener {
             viewModel.disconnect()
+        }
+
+        // Feature 6: telemetry alert monitoring
+        val bleManager = (requireActivity() as? MainActivity)?.bleManager
+        if (bleManager != null) {
+            val prefs = requireContext().getSharedPreferences("fd_settings", android.content.Context.MODE_PRIVATE)
+            val alertMonitor = AlertMonitor(bleManager, prefs)
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    alertMonitor.alertFlow().collect { event ->
+                        binding.root.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        Snackbar.make(binding.root, event.message, 5000).show()
+                    }
+                }
+            }
+
+            // Reset monitor on disconnect
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    bleManager.connectionState.collect { state ->
+                        if (state is ConnectionState.Disconnected) {
+                            alertMonitor.reset()
+                        }
+                    }
+                }
+            }
         }
     }
 
