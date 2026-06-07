@@ -1,0 +1,162 @@
+[
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_fragment_settings.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/fragment_settings.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_item_scan_device.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/item_scan_device.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_ic_history.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/ic_history.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/navigation_nav_graph.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/navigation/nav_graph.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_ic_profile.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/ic_profile.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_ic_import.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/ic_import.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_item_changelog_entry.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/item_changelog_entry.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_fragment_dashboard.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/fragment_dashboard.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_ic_params.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/ic_params.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_fragment_params_menu.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/fragment_params_menu.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/xml_file_provider_paths.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/xml/file_provider_paths.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_item_param.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/item_param.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_ic_error.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/ic_error.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_fragment_scan.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/fragment_scan.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_item_error_code.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/item_error_code.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_fragment_profiles.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/fragment_profiles.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_ic_settings.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/ic_settings.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_bg_gear_indicator.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/bg_gear_indicator.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_item_params_section.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/item_params_section.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_dialog_param_edit.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/dialog_param_edit.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_item_profile.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/item_profile.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/menu_params_menu_toolbar.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/menu/params_menu_toolbar.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/menu_toolbar_menu.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/menu/toolbar_menu.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/drawable_ic_dashboard.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/drawable/ic_dashboard.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_fragment_error_codes.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/fragment_error_codes.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_activity_main.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_fragment_params_section.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/fragment_params_section.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/color_bottom_nav_selector.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/color/bottom_nav_selector.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/layout_bottom_sheet_changelog.xml.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/layout/bottom_sheet_changelog.xml"
+    },
+    {
+        "merged": "com.bretthalliday.fdtuner.app-merged_res-51:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.bretthalliday.fdtuner.app-main-53:/mipmap-xxhdpi/ic_launcher_round.png"
+    }
+]

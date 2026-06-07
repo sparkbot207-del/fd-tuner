@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@drawable/ic_dashboard"
+        android:title="@string/nav_dashboard" />
+
+    <item
+        android:id="@+id/paramsMenuFragment"
+        android:icon="@drawable/ic_params"
+        android:title="@string/nav_params" />
+
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/nav_settings" />
+
+    <item
+        android:id="@+id/profilesFragment"
+        android:icon="@drawable/ic_profile"
+        android:title="Profiles" />
+
+    <item
+        android:id="@+id/errorCodesFragment"
+        android:icon="@drawable/ic_error"
+        android:title="Errors" />
+
+</menu>

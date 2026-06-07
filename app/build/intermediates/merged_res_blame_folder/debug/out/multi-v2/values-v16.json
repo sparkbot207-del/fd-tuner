@@ -1,0 +1,38 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.bretthalliday.fdtuner.app-mergeDebugResources-49:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "/home/bhalliday/.gradle/caches/transforms-3/0fe6979b72ed99e65595d974c9a82643/transformed/core-1.12.0/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "65",
+                        "endOffsets": "116"
+                    }
+                },
+                {
+                    "source": "/home/bhalliday/.gradle/caches/transforms-3/0e334e23e6ecd2828564ac8a7e8471cd/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    },
+                    "to": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "121",
+                        "endLines": "6",
+                        "endColumns": "12",
+                        "endOffsets": "289"
+                    }
+                }
+            ]
+        }
+    ]
+}

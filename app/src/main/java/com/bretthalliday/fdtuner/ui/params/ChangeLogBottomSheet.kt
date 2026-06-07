@@ -102,19 +102,14 @@ class ChangeLogBottomSheet : BottomSheetDialogFragment() {
     private inner class ChangeLogAdapter :
         ListAdapter<ChangeLogListItem, RecyclerView.ViewHolder>(DIFF) {
 
-        companion object {
-            const val TYPE_HEADER = 0
-            const val TYPE_ENTRY = 1
-        }
-
         override fun getItemViewType(position: Int) = when (getItem(position)) {
-            is ChangeLogListItem.Header -> TYPE_HEADER
-            is ChangeLogListItem.Entry -> TYPE_ENTRY
+            is ChangeLogListItem.Header -> VIEW_TYPE_HEADER
+            is ChangeLogListItem.Entry -> VIEW_TYPE_ENTRY
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
             return when (viewType) {
-                TYPE_HEADER -> {
+                VIEW_TYPE_HEADER -> {
                     val tv = LayoutInflater.from(parent.context)
                         .inflate(android.R.layout.simple_list_item_1, parent, false)
                     HeaderVH(tv)
@@ -170,6 +165,8 @@ class ChangeLogBottomSheet : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "ChangeLogBottomSheet"
+        private const val VIEW_TYPE_HEADER = 0
+        private const val VIEW_TYPE_ENTRY = 1
 
         val DIFF = object : DiffUtil.ItemCallback<ChangeLogListItem>() {
             override fun areItemsTheSame(a: ChangeLogListItem, b: ChangeLogListItem): Boolean {

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark">
+
+    <TextView
+        android:id="@+id/tvSectionTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Section"
+        android:textColor="@color/text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:padding="@dimen/screen_padding"
+        android:background="@color/bg_surface" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tap a parameter to edit. Dimmed = address unknown."
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingVertical="8dp" />
+
+    <!-- PID warning banner — hidden by default, shown in code for PID section only -->
+    <LinearLayout
+        android:id="@+id/layoutPidWarning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#22FF4444"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingVertical="12dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="&#9888;&#65039;"
+            android:textSize="18sp"
+            android:paddingEnd="8dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Warning: Improper PID settings can cause motor failures or controller damage!"
+            android:textColor="#FF6666"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:lineSpacingMultiplier="1.3" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerParams"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        android:scrollbarStyle="outsideOverlay" />
+
+</LinearLayout>

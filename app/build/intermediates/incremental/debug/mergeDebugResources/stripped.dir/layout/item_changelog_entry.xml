@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="10dp">
+
+    <!-- Timestamp (left) -->
+    <TextView
+        android:id="@+id/tvTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="11sp"
+        android:fontFamily="monospace"
+        android:minWidth="68dp" />
+
+    <!-- Divider bar -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="16dp"
+        android:background="@color/divider"
+        android:layout_marginHorizontal="10dp" />
+
+    <!-- Param name + old→new (right) -->
+    <TextView
+        android:id="@+id/tvParamChange"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@color/text_primary"
+        android:textSize="13sp"
+        android:ellipsize="end"
+        android:maxLines="2" />
+
+</LinearLayout>
