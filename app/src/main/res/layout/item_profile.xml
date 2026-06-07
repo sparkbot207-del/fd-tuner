@@ -17,8 +17,9 @@
         android:padding="14dp"
         android:gravity="center_vertical">
 
-        <!-- Icon -->
+        <!-- Icon: 💾 for controller profiles, ⚡ for demo -->
         <TextView
+            android:id="@+id/tvProfileIcon"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:text="💾"

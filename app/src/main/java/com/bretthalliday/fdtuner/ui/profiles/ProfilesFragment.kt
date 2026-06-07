@@ -49,24 +49,38 @@ class ProfilesFragment : Fragment() {
 
         refreshList()
 
-        // Show/hide empty state
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                paramsViewModel.rawParams.collect {
-                    binding.btnSaveProfile.isEnabled = it.isNotEmpty()
-                    binding.tvSaveHint.text = if (it.isEmpty())
-                        "Connect to a controller and tap Read All to load params before saving."
-                    else
-                        "${it.size} parameters ready to save."
+                paramsViewModel.rawParams.collect { params ->
+                    val inDemo = paramsViewModel.isDemo
+                    binding.btnSaveProfile.isEnabled = params.isNotEmpty()
+                    binding.tvSaveHint.text = when {
+                        params.isEmpty() && inDemo ->
+                            "In demo mode — edit some params then save as a demo profile."
+                        params.isEmpty() ->
+                            "Connect to a controller and read params before saving."
+                        inDemo ->
+                            "${params.size} demo params ready to save."
+                        else ->
+                            "${params.size} controller params ready to save."
+                    }
+                    // Update section header label
+                    binding.tvProfilesHeader.text =
+                        if (inDemo) "⚡ DEMO PROFILES" else "CONTROLLER PROFILES"
                 }
             }
         }
     }
 
     private fun refreshList() {
-        val profiles = ProfileManager.listProfiles(requireContext())
+        val inDemo = paramsViewModel.isDemo
+        val profiles = ProfileManager.listProfiles(requireContext(), isDemo = inDemo)
         adapter.submitList(profiles)
         binding.tvNoProfiles.visibility = if (profiles.isEmpty()) View.VISIBLE else View.GONE
+        binding.tvNoProfiles.text = if (inDemo)
+            "No demo profiles saved yet.\nEdit params in demo mode then tap Save."
+        else
+            "No controller profiles saved yet.\nConnect, read params, then tap Save."
     }
 
     private fun showSaveDialog() {
@@ -93,9 +107,9 @@ class ProfilesFragment : Fragment() {
                             input.error = "Name cannot contain |"
                             return@setOnClickListener
                         }
-                        val exists = ProfileManager.profileExists(requireContext(), name)
+                        val inDemo = paramsViewModel.isDemo
+                        val exists = ProfileManager.profileExists(requireContext(), name, isDemo = inDemo)
                         if (exists) {
-                            // Confirm overwrite of saved profile
                             AlertDialog.Builder(requireContext())
                                 .setTitle("Overwrite Profile?")
                                 .setMessage("\"$name\" already exists. Replace it?")
@@ -118,35 +132,55 @@ class ProfilesFragment : Fragment() {
     private fun doSave(name: String) {
         val params = paramsViewModel.rawParams.value
         if (params.isEmpty()) {
-            Toast.makeText(requireContext(), "No params to save — read from controller first", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "No params to save", Toast.LENGTH_SHORT).show()
             return
         }
-        ProfileManager.save(requireContext(), name, params)
-        Toast.makeText(requireContext(), "Profile \"$name\" saved (${params.size} params)", Toast.LENGTH_SHORT).show()
+        val inDemo = paramsViewModel.isDemo
+        ProfileManager.save(requireContext(), name, params, isDemo = inDemo)
+        val label = if (inDemo) "demo profile" else "profile"
+        Toast.makeText(requireContext(), "Saved $label \"$name\" (${params.size} params)", Toast.LENGTH_SHORT).show()
         refreshList()
     }
 
     private fun confirmLoad(profile: SavedProfile) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("⚠️ Load Profile?")
-            .setMessage(
+        val inDemo = paramsViewModel.isDemo
+        val (title, message, btnLabel) = if (inDemo) {
+            Triple(
+                "Load Demo Profile?",
+                "Loading \"${profile.name}\" will apply ${profile.paramCount} parameters to the demo session.\n\nNo data will be written to any controller.",
+                "Load"
+            )
+        } else {
+            Triple(
+                "⚠️ Load Profile?",
                 "Loading \"${profile.name}\" will immediately write ${profile.paramCount} parameters to your controller.\n\n" +
                 "This will overwrite ALL current controller settings.\n\n" +
-                "Make sure the bike is stationary and safe before continuing."
+                "Make sure the bike is stationary and safe before continuing.",
+                "Load & Write"
             )
-            .setPositiveButton("Load & Write") { _, _ -> doLoad(profile) }
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(btnLabel) { _, _ -> doLoad(profile) }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
     private fun doLoad(profile: SavedProfile) {
-        val params = ProfileManager.load(requireContext(), profile.name) ?: run {
+        val inDemo = paramsViewModel.isDemo
+        val params = ProfileManager.load(requireContext(), profile.name, isDemo = inDemo) ?: run {
             Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show()
             return
         }
 
-        if (paramsViewModel.isDemo) {
-            Toast.makeText(requireContext(), "Demo mode — connect to a real controller to load profiles", Toast.LENGTH_SHORT).show()
+        // Demo mode: apply params directly to local map, no BLE write needed
+        if (inDemo) {
+            params.forEach { (addr, value) ->
+                (requireActivity() as? com.bretthalliday.fdtuner.MainActivity)
+                    ?.bleManager?.updateDemoParam(addr, value)
+            }
+            Toast.makeText(requireContext(), "⚡ Demo profile \"${profile.name}\" loaded", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -178,7 +212,7 @@ class ProfilesFragment : Fragment() {
             .setTitle("Delete Profile?")
             .setMessage("Delete \"${profile.name}\"? This cannot be undone.")
             .setPositiveButton("Delete") { _, _ ->
-                ProfileManager.delete(requireContext(), profile.name)
+                ProfileManager.delete(requireContext(), profile.name, isDemo = profile.isDemo)
                 Toast.makeText(requireContext(), "Deleted \"${profile.name}\"", Toast.LENGTH_SHORT).show()
                 refreshList()
             }
@@ -206,6 +240,7 @@ class ProfileAdapter(
         fun bind(profile: SavedProfile) {
             b.tvProfileName.text = profile.name
             b.tvProfileMeta.text = "${profile.paramCount} params  ·  ${profile.savedAt}"
+            b.tvProfileIcon.text = if (profile.isDemo) "⚡" else "💾"
             b.btnLoad.setOnClickListener { onLoad(profile) }
             b.btnDelete.setOnClickListener { onDelete(profile) }
         }

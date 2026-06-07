@@ -44,9 +44,10 @@
         android:progressBackgroundTint="@color/bg_elevated" />
 
     <TextView
+        android:id="@+id/tvProfilesHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SAVED PROFILES"
+        android:text="CONTROLLER PROFILES"
         android:textColor="@color/text_secondary"
         android:textSize="11sp"
         android:letterSpacing="0.12"
