@@ -95,6 +95,11 @@ object FardriverErrors {
     )
 }
 
+private val ITEM_DIFF = object : DiffUtil.ItemCallback<ErrorCode>() {
+    override fun areItemsTheSame(a: ErrorCode, b: ErrorCode) = a.beeps == b.beeps && a.title == b.title
+    override fun areContentsTheSame(a: ErrorCode, b: ErrorCode) = a == b
+}
+
 class ErrorCodesFragment : Fragment() {
 
     private var _binding: FragmentErrorCodesBinding? = null
@@ -208,11 +213,6 @@ class ErrorCodesFragment : Fragment() {
             holder.bind(item, item.beeps == highlighted)
         }
 
-        companion object {
-            val ITEM_DIFF = object : DiffUtil.ItemCallback<ErrorCode>() {
-                override fun areItemsTheSame(a: ErrorCode, b: ErrorCode) = a.beeps == b.beeps && a.title == b.title
-                override fun areContentsTheSame(a: ErrorCode, b: ErrorCode) = a == b
-            }
-        }
+
     }
 }
