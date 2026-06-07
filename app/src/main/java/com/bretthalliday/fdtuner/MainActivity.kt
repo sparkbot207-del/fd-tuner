@@ -36,6 +36,12 @@ class MainActivity : AppCompatActivity() {
 
         bleManager = FardriverBleManager(applicationContext)
 
+        // Restore persisted settings so speed/pole pairs are correct from launch
+        val prefs = getSharedPreferences("fd_settings", android.content.Context.MODE_PRIVATE)
+        bleManager.useMph = prefs.getBoolean("use_mph", true)
+        bleManager.polePairs = prefs.getInt("pole_pairs", 23)
+        bleManager.wheelCircumferenceMm = prefs.getInt("wheel_circ_mm", 2100)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

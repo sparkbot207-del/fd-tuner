@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_dark">
@@ -9,9 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/screen_padding">
+        android:padding="@dimen/screen_padding"
+        android:paddingBottom="80dp">
 
-        <!-- Section: Speed -->
+        <!-- Section header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,13 +23,13 @@
             android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             app:cardBackgroundColor="@color/bg_surface"
             app:cardCornerRadius="8dp"
-            xmlns:app="http://schemas.android.com/apk/res-auto">
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -35,6 +37,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Speed units -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -46,36 +49,34 @@
                 <Spinner
                     android:id="@+id/spinnerSpeedUnits"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/bg_dark"
+                    android:layout_height="48dp"
+                    android:background="@color/bg_elevated"
                     android:popupBackground="@color/bg_surface" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginVertical="12dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/divider" android:layout_marginVertical="14dp" />
 
+                <!-- Pole pairs -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pole Pairs"
+                    android:text="Motor Pole Pairs"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="2dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Motor pole pairs (e.g. QS205 = 23)"
+                    android:text="QS205 / QS273 = 23  ·  MAC motors = 8–16"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etPolePairs"
@@ -86,32 +87,30 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:layout_marginVertical="12dp" />
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="@color/divider" android:layout_marginVertical="14dp" />
 
+                <!-- Wheel circumference -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Wheel Circumference (mm)"
                     android:textColor="@color/text_primary"
                     android:textSize="15sp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="2dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Outer circumference of drive wheel in mm"
+                    android:text="Outer circumference of your drive wheel"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etWheelCircumference"
@@ -122,16 +121,44 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Preset buttons -->
+                <!-- Presets row 1 — your bikes -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Presets:"
+                    android:text="Quick presets:"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="6dp" />
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="6dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetOnyxRcr"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:text="Onyx RCR"
+                        android:textSize="11sp"
+                        android:layout_marginEnd="4dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPresetSuper73"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:text="Super73"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
+
+                <!-- Presets row 2 — standard sizes -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -139,40 +166,40 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPreset20inch"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="36dp"
                         android:layout_weight="1"
-                        android:text='20"'
-                        android:textSize="13sp"
-                        android:layout_marginEnd="4dp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                        android:text="20&quot;"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="4dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPreset24inch"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="36dp"
                         android:layout_weight="1"
-                        android:text='24"'
-                        android:textSize="13sp"
-                        android:layout_marginEnd="4dp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                        android:text="24&quot;"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="4dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPreset26inch"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="36dp"
                         android:layout_weight="1"
-                        android:text='26"'
-                        android:textSize="13sp"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                        android:text="26&quot;"
+                        android:textSize="12sp" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- About -->
+        <!-- About section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -182,12 +209,12 @@
             android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardBackgroundColor="@color/bg_surface"
             app:cardCornerRadius="8dp"
-            xmlns:app="http://schemas.android.com/apk/res-auto">
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -201,6 +228,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp"
+                    android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -209,11 +237,11 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp"
-                    android:lineSpacingMultiplier="1.4" />
+                    android:lineSpacingMultiplier="1.5" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 
