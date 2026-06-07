@@ -269,8 +269,6 @@
 
         </LinearLayout>
 
-    </LinearLayout>
-
         <!-- Disconnect button at bottom of dashboard -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDisconnect"
