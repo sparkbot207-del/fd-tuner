@@ -1,27 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary accent: Fardriver orange -->
-    <color name="orange_primary">#FF6600</color>
-    <color name="orange_dark">#CC5200</color>
+    <!-- Fardriver Whisperer palette — cyberpunk/synthwave -->
 
-    <!-- Dark theme backgrounds -->
-    <color name="bg_dark">#111111</color>
-    <color name="bg_surface">#1E1E1E</color>
-    <color name="bg_elevated">#2A2A2A</color>
+    <!-- Primary: hot pink/magenta from the logo text -->
+    <color name="pink_primary">#FF1E8E</color>
+    <color name="pink_dark">#C4006B</color>
+    <color name="pink_glow">#FF1E8E40</color>
+
+    <!-- Accent: electric cyan from the BLE signal icon -->
+    <color name="cyan_accent">#00C8FF</color>
+    <color name="cyan_dark">#0099CC</color>
+    <color name="cyan_glow">#00C8FF30</color>
+
+    <!-- Backgrounds: deep dark purple-black -->
+    <color name="bg_dark">#0D0B14</color>
+    <color name="bg_surface">#161222</color>
+    <color name="bg_elevated">#1E1A2E</color>
+    <color name="bg_card">#1A1628</color>
 
     <!-- Text -->
     <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#9E9E9E</color>
-    <color name="text_hint">#616161</color>
+    <color name="text_secondary">#B0A8C8</color>
+    <color name="text_hint">#6B6080</color>
 
     <!-- Status / indicators -->
-    <color name="soc_green">#4CAF50</color>
-    <color name="regen_blue">#2196F3</color>
-    <color name="error_red">#F44336</color>
-    <color name="warning_yellow">#FFC107</color>
+    <color name="soc_green">#00FF9F</color>
+    <color name="regen_cyan">@color/cyan_accent</color>
+    <color name="error_red">#FF4444</color>
+    <color name="warning_amber">#FFB300</color>
+    <color name="eye_red">#FF3300</color>
 
     <!-- UI elements -->
-    <color name="divider">#2C2C2C</color>
-    <color name="bottom_nav_active">@color/orange_primary</color>
-    <color name="bottom_nav_inactive">#757575</color>
+    <color name="divider">#2A2040</color>
+    <color name="bottom_nav_active">@color/pink_primary</color>
+    <color name="bottom_nav_inactive">#5A5070</color>
+
+    <!-- Legacy aliases so existing code compiles without changes -->
+    <color name="orange_primary">@color/pink_primary</color>
+    <color name="orange_dark">@color/pink_dark</color>
 </resources>

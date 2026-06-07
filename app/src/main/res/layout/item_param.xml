@@ -26,7 +26,7 @@
             android:id="@+id/tvParamValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/orange_primary"
+            android:textColor="@color/pink_primary"
             android:textSize="15sp"
             android:textStyle="bold"
             android:paddingStart="8dp" />

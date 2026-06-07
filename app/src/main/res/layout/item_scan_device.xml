@@ -52,7 +52,7 @@
             android:layout_height="36dp"
             android:text="Connect"
             android:textSize="14sp"
-            app:backgroundTint="@color/orange_primary"
+            app:backgroundTint="@color/pink_primary"
             android:textColor="@color/bg_dark"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

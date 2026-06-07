@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SPEED SETTINGS"
-            android:textColor="@color/orange_primary"
+            android:textColor="@color/pink_primary"
             android:textSize="12sp"
             android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
@@ -177,7 +177,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ABOUT"
-            android:textColor="@color/orange_primary"
+            android:textColor="@color/pink_primary"
             android:textSize="12sp"
             android:letterSpacing="0.12"
             android:layout_marginBottom="8dp" />
