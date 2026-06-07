@@ -1,6 +1,8 @@
 package com.bretthalliday.fdtuner
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -64,8 +66,9 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 bleManager.connectionState.collect { state ->
                     updateToolbar(state)
+                    invalidateOptionsMenu()
 
-                    // If we were connected and now disconnected, navigate back to scan
+                    // If we were connected/demo and now disconnected, navigate back to scan
                     if (state is ConnectionState.Disconnected) {
                         val currentDest = navController.currentDestination?.id
                         if (currentDest != null && currentDest != R.id.scanFragment) {
@@ -74,6 +77,30 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val showDisconnect = bleManager.connectionState.value.let {
+            it is ConnectionState.Connected || it is ConnectionState.Demo
+        }
+        menu.findItem(R.id.action_disconnect)?.isVisible = showDisconnect
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_disconnect -> {
+                if (bleManager.isDemo) bleManager.stopDemo()
+                else bleManager.disconnect()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
