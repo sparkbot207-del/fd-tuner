@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Clock face circle -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M12,2 C6.477,2 2,6.477 2,12 C2,17.523 6.477,22 12,22 C17.523,22 22,17.523 22,12 C22,6.477 17.523,2 12,2 Z" />
+    <!-- Clock hands -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M12,7 L12,12 L16,14" />
+    <!-- Rotate arrow (history indicator) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M2.5,4.5 L2.5,8.5 L6.5,8.5 L5.1,7.1 C6.3,5.8 8.1,5 10,5 C13.7,5 16.8,7.7 17.4,11.3 L19.4,11 C18.6,6.4 14.7,3 10,3 C7.6,3 5.4,4 3.8,5.7 L2.5,4.5 Z" />
+</vector>

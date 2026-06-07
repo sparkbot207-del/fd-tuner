@@ -1,14 +1,20 @@
 package com.bretthalliday.fdtuner.ui.params
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.bretthalliday.fdtuner.ble.FardriverBleManager
+import com.bretthalliday.fdtuner.data.ChangeLogEntry
+import com.bretthalliday.fdtuner.data.ChangeLogManager
 import com.bretthalliday.fdtuner.data.ParamDefinitions
 import com.bretthalliday.fdtuner.model.ParamDef
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ParamsViewModel(private val bleManager: FardriverBleManager) : ViewModel() {
+class ParamsViewModel(
+    application: Application,
+    private val bleManager: FardriverBleManager
+) : AndroidViewModel(application) {
 
     val rawParams: StateFlow<Map<Int, Int>> = bleManager.rawParams
 
@@ -16,16 +22,22 @@ class ParamsViewModel(private val bleManager: FardriverBleManager) : ViewModel()
 
     fun paramsForSection(section: String): List<ParamDef> = ParamDefinitions.forSection(section)
 
-    /**
-     * Write a new value to a param, performing read-modify-write for bit-packed params.
-     * Returns true on success.
-     */
+    /** All params across every section — used by search. */
+    val allParams: List<ParamDef> by lazy {
+        ParamDefinitions.SECTIONS.flatMap { ParamDefinitions.forSection(it) }
+    }
+
     val isDemo: Boolean get() = bleManager.isDemo
 
+    /**
+     * Write a new value to a param, performing read-modify-write for bit-packed params.
+     * Logs the change to ChangeLogManager for both demo and live writes.
+     */
     fun writeParam(param: ParamDef, displayValue: Int) {
         val addr = param.addr ?: return
         viewModelScope.launch {
             val currentRaw = bleManager.rawParams.value[addr] ?: 0
+            val oldRaw = currentRaw
             val newRaw = param.packValue(currentRaw, displayValue)
             if (bleManager.isDemo) {
                 // Demo mode: update local map only, no BLE write
@@ -33,6 +45,18 @@ class ParamsViewModel(private val bleManager: FardriverBleManager) : ViewModel()
             } else {
                 bleManager.writeParam(addr, newRaw)
             }
+            // Log the change (both demo and live)
+            ChangeLogManager.log(
+                getApplication(),
+                ChangeLogEntry(
+                    timestamp = ChangeLogManager.nowIso(),
+                    paramAddr = addr,
+                    paramName = param.name,
+                    oldValue = oldRaw,
+                    newValue = newRaw,
+                    isDemo = bleManager.isDemo
+                )
+            )
         }
     }
 

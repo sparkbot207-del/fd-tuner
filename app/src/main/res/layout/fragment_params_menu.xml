@@ -1,21 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg_dark">
 
-    <TextView
+    <!-- Header bar with title -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Parameters"
-        android:textColor="@color/text_primary"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:padding="@dimen/screen_padding"
-        android:background="@color/bg_surface" />
+        android:orientation="vertical"
+        android:background="@color/bg_surface"
+        android:paddingHorizontal="@dimen/screen_padding"
+        android:paddingTop="@dimen/screen_padding"
+        android:paddingBottom="12dp">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Parameters"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Feature 5: search field -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            android:hint="Search parameters…"
+            app:startIconDrawable="@android:drawable/ic_menu_search"
+            app:startIconTint="@color/text_secondary"
+            app:boxStrokeColor="@color/pink_primary"
+            app:hintTextColor="@color/text_secondary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:textColor="@color/text_primary" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <!-- Section list (shown when search is empty) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerSections"
         android:layout_width="match_parent"
@@ -23,5 +57,15 @@
         android:clipToPadding="false"
         android:paddingTop="8dp"
         android:paddingBottom="80dp" />
+
+    <!-- Flat search results (shown when search has text) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerSearchResults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="80dp"
+        android:visibility="gone" />
 
 </LinearLayout>
