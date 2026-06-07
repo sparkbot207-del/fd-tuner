@@ -454,43 +454,106 @@ object ParamDefinitions {
 
     // ---- Energy Regenerate Section ----
 
-    private val energyRegenSection = listOf(
-        ParamDef(
+    private val energyRegenSection = buildList {
+        // Left #1 — StopBackCurr
+        add(ParamDef(
             name = "StopBackCurr",
             addr = null,
             section = SECTION_ENERGY_REGEN,
             scale = 4f,
             unit = "A",
-            notes = "Regen current when stopped (addr in 0x63 area)"
-        ),
-        ParamDef(
-            name = "MaxBackCurr",
-            addr = null,
-            section = SECTION_ENERGY_REGEN,
-            scale = 4f,
-            unit = "A",
-            notes = "Maximum regen current (addr in 0x63 area)"
-        ),
-        ParamDef(
-            name = "BattRatedCapacity",
+            notes = "Regen current at stop (addr TBD — in 0x63 area)"
+        ))
+        // Left #2 — BattRatedCapacity
+        add(ParamDef(
+            name = "Batt RatedCapacity",
             addr = 0x1C,
             section = SECTION_ENERGY_REGEN,
             unit = "Ah",
             minVal = 0,
             maxVal = 9999,
-            notes = "Battery rated capacity (shared with Protect)"
-        ),
-        ParamDef(
+            notes = "Battery rated capacity in amp-hours"
+        ))
+        // Left #3 — FreeThrottle
+        add(ParamDef(
             name = "FreeThrottle",
             addr = 0x2C,
             section = SECTION_ENERGY_REGEN,
-            unit = "",
+            unit = "%",
             minVal = 0,
             maxVal = 255,
             isLoByte = true,
-            notes = "Free-throttle regen threshold"
+            notes = "Regen throttle percentage threshold"
+        ))
+        // Right #1 — MaxBackCurr
+        add(ParamDef(
+            name = "MaxBackCurr",
+            addr = null,
+            section = SECTION_ENERGY_REGEN,
+            scale = 4f,
+            unit = "A",
+            isSafetyCritical = true,
+            notes = "Maximum regen current — increasing allows stronger braking (addr TBD)"
+        ))
+
+        // Regen curve: 18 RPM/% pairs
+        // nratio values (%) confirmed from fardriver.hpp:
+        //   nratio_0..13 → addr TBD (before 0x94)
+        //   nratio_14 → 0x94 lo byte
+        //   nratio_15 → 0x94 hi byte
+        //   nratio_16 → 0x9A lo byte
+        //   nratio_17 → 0x9A hi byte
+        // RPM setpoints → addr TBD (in 0x63/0x69 area)
+
+        val regenNratioAddrs: List<Triple<Int?, Boolean, Boolean>> = listOf(
+            // addr,   isLoByte, isHiByte
+            Triple(null, false, false), // point 1  — nratio_0, addr TBD
+            Triple(null, false, false), // point 2  — nratio_1
+            Triple(null, false, false), // point 3  — nratio_2
+            Triple(null, false, false), // point 4  — nratio_3
+            Triple(null, false, false), // point 5  — nratio_4
+            Triple(null, false, false), // point 6  — nratio_5
+            Triple(null, false, false), // point 7  — nratio_6
+            Triple(null, false, false), // point 8  — nratio_7
+            Triple(null, false, false), // point 9  — nratio_8
+            Triple(null, false, false), // point 10 — nratio_9
+            Triple(null, false, false), // point 11 — nratio_10
+            Triple(null, false, false), // point 12 — nratio_11
+            Triple(null, false, false), // point 13 — nratio_12
+            Triple(null, false, false), // point 14 — nratio_13
+            Triple(0x94, true,  false), // point 15 — nratio_14 @ 0x94 lo
+            Triple(0x94, false, true ), // point 16 — nratio_15 @ 0x94 hi
+            Triple(0x9A, true,  false), // point 17 — nratio_16 @ 0x9A lo
+            Triple(0x9A, false, true ), // point 18 — nratio_17 @ 0x9A hi
         )
-    )
+
+        for (i in 1..18) {
+            val (pctAddr, pctLo, pctHi) = regenNratioAddrs[i - 1]
+            // RPM setpoint for each curve point
+            add(ParamDef(
+                name = "Regen${i}_RPM",
+                addr = null,   // TBD — confirm from controller capture
+                section = SECTION_ENERGY_REGEN,
+                unit = "RPM",
+                minVal = 0,
+                maxVal = 9999,
+                notes = "Regen curve point $i — RPM setpoint (addr TBD)"
+            ))
+            // Regen percentage for each curve point
+            add(ParamDef(
+                name = "Regen${i}_Pct",
+                addr = pctAddr,
+                section = SECTION_ENERGY_REGEN,
+                unit = "%",
+                minVal = -100,
+                maxVal = 100,
+                isLoByte = pctLo,
+                isHiByte = pctHi,
+                notes = "Regen curve point $i — regen %" +
+                    if (pctAddr == null) " (addr TBD)" else " @ 0x${pctAddr.toString(16)}"
+            ))
+        }
+    }
 
     // ---- Ratios in Speed Section ----
 
