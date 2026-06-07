@@ -35,6 +35,11 @@ class ParamsViewModel(private val bleManager: FardriverBleManager) : ViewModel()
     /**
      * Get the current raw word for a param's address (for display in edit dialog).
      */
+    suspend fun loadProfile(
+        params: Map<Int, Int>,
+        onProgress: (Int, Int) -> Unit
+    ): Boolean = bleManager.writeAllParams(params, onProgress)
+
     fun getRawWord(param: ParamDef): Int? {
         val addr = param.addr ?: return null
         return bleManager.rawParams.value[addr]

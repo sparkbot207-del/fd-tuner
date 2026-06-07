@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark">
+
+    <!-- Header / Save button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/bg_surface"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvSaveHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Connect to a controller and read params before saving."
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveProfile"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="💾  Save Current Params as Profile"
+            android:textSize="15sp"
+            android:enabled="false" />
+
+    </LinearLayout>
+
+    <!-- Progress bar (hidden until load starts) -->
+    <ProgressBar
+        android:id="@+id/progressLoad"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:visibility="gone"
+        android:progressTint="@color/pink_primary"
+        android:progressBackgroundTint="@color/bg_elevated" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SAVED PROFILES"
+        android:textColor="@color/text_secondary"
+        android:textSize="11sp"
+        android:letterSpacing="0.12"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="6dp" />
+
+    <!-- Empty state -->
+    <TextView
+        android:id="@+id/tvNoProfiles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No profiles saved yet.\nConnect to your controller, read all params, then tap Save."
+        android:textColor="@color/text_hint"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone"
+        android:lineSpacingMultiplier="1.4" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerProfiles"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp" />
+
+</LinearLayout>

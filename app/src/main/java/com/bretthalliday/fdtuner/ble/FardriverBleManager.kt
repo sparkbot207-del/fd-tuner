@@ -349,6 +349,33 @@ class FardriverBleManager(private val context: Context) {
         _telemetry.value = telData
     }
 
+    // ---- Bulk write (profile load) ----
+
+    /**
+     * Write every param in the map to the controller, one at a time.
+     * Emits progress (0..total). Skips known read-only / telemetry addresses.
+     */
+    suspend fun writeAllParams(
+        params: Map<Int, Int>,
+        onProgress: (done: Int, total: Int) -> Unit = { _, _ -> }
+    ): Boolean {
+        // Skip live telemetry addresses — don't write those back
+        val readOnlyAddrs = setOf(0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7,
+                                   0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED,
+                                   0xEE, 0xEF, 0xF0, 0xA0)
+        val writable = params.filterKeys { it !in readOnlyAddrs }
+        val total = writable.size
+        var done = 0
+        for ((addr, value) in writable) {
+            val ok = writeParam(addr, value)
+            if (!ok) return false
+            done++
+            onProgress(done, total)
+            delay(60) // give controller time between writes
+        }
+        return true
+    }
+
     // ---- Demo mode ----
 
     fun startDemo() {
