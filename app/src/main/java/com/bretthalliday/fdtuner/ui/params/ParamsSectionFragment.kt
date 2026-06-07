@@ -44,6 +44,10 @@ class ParamsSectionFragment : Fragment() {
 
         binding.tvSectionTitle.text = sectionName
 
+        // Show PID warning banner only on the PID section
+        binding.layoutPidWarning.visibility =
+            if (sectionName == ParamDefinitions.SECTION_PID) View.VISIBLE else View.GONE
+
         paramAdapter = ParamAdapter { param ->
             if (viewModel.isDemo) {
                 android.widget.Toast.makeText(
