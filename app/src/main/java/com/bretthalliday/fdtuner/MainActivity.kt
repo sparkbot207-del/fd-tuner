@@ -104,8 +104,8 @@ class MainActivity : AppCompatActivity() {
      *
      * For simplicity, we use a custom factory via the Application.
      */
-    override fun getDefaultViewModelProviderFactory(): androidx.lifecycle.ViewModelProvider.Factory {
-        return object : androidx.lifecycle.ViewModelProvider.Factory {
+    override val defaultViewModelProviderFactory: androidx.lifecycle.ViewModelProvider.Factory
+        get() = object : androidx.lifecycle.ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
                 return when {
@@ -119,7 +119,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
 
     override fun onDestroy() {
         super.onDestroy()
