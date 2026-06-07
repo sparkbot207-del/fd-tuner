@@ -67,7 +67,8 @@ object ParamDefinitions {
             unit = "V",
             minVal = 0,
             maxVal = 1000,
-            notes = "Nominal battery voltage"
+            notes = "Nominal battery voltage",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "MaxSpeed",
@@ -76,7 +77,8 @@ object ParamDefinitions {
             unit = "RPM",
             minVal = 0,
             maxVal = 9999,
-            notes = "Maximum motor RPM limit"
+            notes = "Maximum motor RPM limit",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "MaxLineCurr",
@@ -86,7 +88,8 @@ object ParamDefinitions {
             unit = "A",
             minVal = 0,
             maxVal = 999,
-            notes = "Maximum battery line current"
+            notes = "Maximum battery line current",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "ThrottleResponse",
@@ -108,7 +111,8 @@ object ParamDefinitions {
             unit = "A",
             minVal = 0,
             maxVal = 999,
-            notes = "Boost / custom max line current"
+            notes = "Boost / custom max line current",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "PhaseExchange",
@@ -201,7 +205,8 @@ object ParamDefinitions {
             unit = "A",
             minVal = 0,
             maxVal = 999,
-            notes = "Maximum phase current"
+            notes = "Maximum phase current",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "BoostPhaseCurr",
@@ -211,7 +216,8 @@ object ParamDefinitions {
             unit = "A",
             minVal = 0,
             maxVal = 999,
-            notes = "Boost / custom max phase current"
+            notes = "Boost / custom max phase current",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "ThrottleHigh",
@@ -364,7 +370,8 @@ object ParamDefinitions {
             unit = "V",
             minVal = 0,
             maxVal = 1000,
-            notes = "Over-voltage cutoff threshold"
+            notes = "Over-voltage cutoff threshold",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "HighVolRestore",
@@ -382,7 +389,8 @@ object ParamDefinitions {
             unit = "V",
             minVal = 0,
             maxVal = 1000,
-            notes = "Under-voltage cutoff threshold"
+            notes = "Under-voltage cutoff threshold",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "LowVolRestore",

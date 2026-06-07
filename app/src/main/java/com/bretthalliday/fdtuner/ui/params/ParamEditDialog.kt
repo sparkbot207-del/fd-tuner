@@ -26,6 +26,11 @@ object ParamEditDialog {
         val context = fragment.requireContext()
         val binding = DialogParamEditBinding.inflate(LayoutInflater.from(context))
 
+        // Safety warning for critical params
+        if (param.isSafetyCritical) {
+            binding.layoutSafetyWarning.visibility = android.view.View.VISIBLE
+        }
+
         // Populate header
         binding.tvDialogParamName.text = param.name
         binding.tvDialogUnit.text = param.unit
@@ -94,9 +99,23 @@ object ParamEditDialog {
                     return@setOnClickListener
                 }
 
-                onConfirm(rawInt)
-                Toast.makeText(context, "Writing ${param.name}…", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
+                // Show explicit confirm: current → new before writing
+                val newDisplayStr = if (param.scale != 1f) "%.2f".format(rawInt / param.scale) else rawInt.toString()
+                androidx.appcompat.app.AlertDialog.Builder(context)
+                    .setTitle("Confirm Write")
+                    .setMessage(
+                        "${param.name}\n\n" +
+                        "Current: $currentDisplay ${param.unit}\n" +
+                        "New:     $newDisplayStr ${param.unit}\n\n" +
+                        if (param.isSafetyCritical) "⚠️ Safety-critical — are you sure?" else "Write this value to the controller?"
+                    )
+                    .setPositiveButton("Write") { _, _ ->
+                        onConfirm(rawInt)
+                        Toast.makeText(context, "Writing ${param.name}…", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
             }
         }
 

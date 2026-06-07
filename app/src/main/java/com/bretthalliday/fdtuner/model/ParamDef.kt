@@ -28,7 +28,8 @@ data class ParamDef(
     val bitShift: Int = 0,
     val isHiByte: Boolean = false,
     val isLoByte: Boolean = false,
-    val notes: String = ""
+    val notes: String = "",
+    val isSafetyCritical: Boolean = false
 ) {
     /** True if this param can be written to the controller */
     val isWritable: Boolean get() = addr != null
