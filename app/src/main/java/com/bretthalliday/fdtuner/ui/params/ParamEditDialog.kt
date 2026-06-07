@@ -46,10 +46,10 @@ object ParamEditDialog {
         }
         binding.tvCurrentValue.text = "Current: $currentDisplay ${param.unit}"
 
-        // Range hint
+        // Suggested range — informational only, controller enforces its own limits
         val minDisplay = if (param.scale != 1f) "%.1f".format(param.minVal / param.scale) else param.minVal.toString()
         val maxDisplay = if (param.scale != 1f) "%.1f".format(param.maxVal / param.scale) else param.maxVal.toString()
-        binding.tvRange.text = "Range: $minDisplay – $maxDisplay ${param.unit}"
+        binding.tvRange.text = "Suggested: $minDisplay – $maxDisplay ${param.unit}"
 
         // Input field
         binding.etNewValue.inputType = if (param.minVal < 0) {
@@ -93,21 +93,36 @@ object ParamEditDialog {
                 // Convert display value → raw integer value (reverse of scale)
                 val rawInt = (displayFloat * param.scale).toInt()
 
-                // Validate against min/max (compare at raw level)
-                if (rawInt < param.minVal || rawInt > param.maxVal) {
-                    binding.etNewValue.error = "Must be between $minDisplay and $maxDisplay"
+                // Hard block only on data type overflow (int16 range)
+                // Controller enforces its own limits — we don't second-guess it
+                val dataTypeMax = if (param.minVal < 0) 32767 else 65535
+                val dataTypeMin = if (param.minVal < 0) -32768 else 0
+                if (rawInt < dataTypeMin || rawInt > dataTypeMax) {
+                    binding.etNewValue.error = "Value out of range (${dataTypeMin}–${dataTypeMax})"
                     return@setOnClickListener
                 }
 
-                // Show explicit confirm: current → new before writing
+                // Soft warning if outside suggested range
+                val outsideSuggested = rawInt < param.minVal || rawInt > param.maxVal
+
                 val newDisplayStr = if (param.scale != 1f) "%.2f".format(rawInt / param.scale) else rawInt.toString()
+                val warningLine = when {
+                    param.isSafetyCritical && outsideSuggested ->
+                        "⚠️ Safety-critical + outside suggested range ($minDisplay–$maxDisplay). Proceed?"
+                    param.isSafetyCritical ->
+                        "⚠️ Safety-critical parameter. Are you sure?"
+                    outsideSuggested ->
+                        "⚠️ Outside suggested range ($minDisplay–$maxDisplay). Controller will decide if it accepts this value."
+                    else -> "Apply this value?"
+                }
+
                 androidx.appcompat.app.AlertDialog.Builder(context)
                     .setTitle("Confirm Write")
                     .setMessage(
                         "${param.name}\n\n" +
                         "Current: $currentDisplay ${param.unit}\n" +
                         "New:     $newDisplayStr ${param.unit}\n\n" +
-                        if (param.isSafetyCritical) "⚠️ Safety-critical — are you sure?" else "Apply this value?"
+                        warningLine
                     )
                     .setPositiveButton("Apply") { _, _ ->
                         onConfirm(rawInt)
