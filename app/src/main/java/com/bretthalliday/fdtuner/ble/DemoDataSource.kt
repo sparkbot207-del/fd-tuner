@@ -114,20 +114,19 @@ object DemoDataSource {
                 val circumM = 2.1
                 val speedKmh = (rpm.toDouble() / polePairs) * circumM * 60.0 / 1000.0
                 val speedMph = speedKmh * 0.621371
-                val power = (voltage * current).toInt().coerceAtLeast(0)
+
+                val gearStr = when (gear) { 0 -> "N"; 1 -> "L"; 2 -> "M"; else -> "H" }
 
                 _telemetry.value = TelemetryData(
-                    voltage = voltage,
-                    current = current.toDouble(),
+                    voltage = voltage.toFloat(),
+                    lineCurrent = current.toFloat(),
                     rpm = rpm,
-                    gear = gear,
-                    speedMph = speedMph,
-                    speedKmh = speedKmh,
-                    controllerTempC = ctrlTemp,
-                    motorTempC = motorTemp,
-                    soc = soc,
-                    regen = current < 0,
-                    powerW = power
+                    gear = gearStr,
+                    speed = speedMph.toFloat(),
+                    speedUnit = "mph",
+                    controllerTemp = ctrlTemp,
+                    motorTemp = motorTemp,
+                    soc = soc
                 )
 
                 tick++
