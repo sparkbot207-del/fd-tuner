@@ -69,7 +69,7 @@ class DashboardFragment : Fragment() {
         val currentColor = if (t.lineCurrent >= 0) {
             requireContext().getColor(com.bretthalliday.fdtuner.R.color.orange_primary)
         } else {
-            requireContext().getColor(com.bretthalliday.fdtuner.R.color.regen_blue)
+            requireContext().getColor(com.bretthalliday.fdtuner.R.color.regen_cyan)
         }
         binding.tvCurrent.setTextColor(currentColor)
 
