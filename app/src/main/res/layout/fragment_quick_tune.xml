@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:clipToPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="QUICK TUNE"
+            android:textColor="@color/pink_primary"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.04" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="⚠ Performance &amp; safety settings — each change confirms individually before writing. Wheel on a stand."
+            android:textColor="@color/warning_amber"
+            android:textSize="11sp"
+            android:background="#14FFB020"
+            android:padding="9dp"
+            android:lineSpacingMultiplier="1.2" />
+
+        <!-- ===== FIELD WEAKENING CURVE ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/dash_card"
+            android:padding="16dp"
+            android:layout_marginTop="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="FIELD WEAKENING CURVE" android:textColor="@color/text_secondary" android:textSize="12sp" android:letterSpacing="0.15" />
+                <TextView android:id="@+id/tvFwTag" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="drag or type" android:textColor="@color/pink_primary" android:textSize="12sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.bretthalliday.fdtuner.ui.params.FwCurveView
+                android:id="@+id/curveView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:textColor="@color/text_secondary" android:textSize="13sp"
+                    android:text="Selected: " />
+                <TextView android:id="@+id/tvSelRpm" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="—" android:textColor="@color/text_primary" android:textSize="13sp" android:textStyle="bold" />
+                <Space android:layout_width="12dp" android:layout_height="1dp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Ratio %" android:textColor="@color/text_secondary" android:textSize="13sp" android:paddingEnd="8dp" />
+                <EditText android:id="@+id/etSelValue" android:layout_width="74dp" android:layout_height="wrap_content"
+                    android:inputType="number" android:maxLines="1" android:gravity="center"
+                    android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold"
+                    android:background="@drawable/dash_track" android:enabled="false" android:imeOptions="actionDone" />
+            </LinearLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp"
+                android:text="X = motor RPM · Y = ratio %. Cyan line = LimitSpeed (FW start). Drag a point, or select it and type a value."
+                android:textColor="@color/text_hint" android:textSize="10.5sp" android:lineSpacingMultiplier="1.2" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnResetCurve"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="11dp"
+                android:text="RESET ALL CURVE POINTS → 100%"
+                android:textColor="@color/cyan_accent"
+                android:textSize="12sp"
+                android:letterSpacing="0.1"
+                app:strokeColor="@color/cyan_accent" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="WEAK RESPONSE" android:textColor="@color/text_secondary" android:textSize="12sp" android:letterSpacing="0.1" />
+                <TextView android:id="@+id/tvWrNote" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="7 = OFF" android:textColor="@color/cyan_accent" android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llWrSegs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <!-- ===== POWER LIMITS ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/dash_card"
+            android:padding="16dp"
+            android:layout_marginTop="12dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="POWER LIMITS" android:textColor="@color/text_secondary" android:textSize="12sp" android:letterSpacing="0.2" android:layout_marginBottom="6dp" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:paddingVertical="11dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Line Amps" android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="battery / bus current" android:textColor="@color/text_hint" android:textSize="10sp" />
+                </LinearLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnLineMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <TextView android:id="@+id/tvLineVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnLinePlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+            </LinearLayout>
+
+            <View style="@style/SettingsDivider" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:paddingVertical="11dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Phase Amps" android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="keep ≥ line · motor current" android:textColor="@color/warning_amber" android:textSize="10sp" />
+                </LinearLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnPhaseMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <TextView android:id="@+id/tvPhaseVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnPhasePlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+            </LinearLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp"
+                android:text="Tap the number to apply (each change confirms)." android:textColor="@color/text_hint" android:textSize="10.5sp" />
+        </LinearLayout>
+
+        <!-- ===== THROTTLE RAMP ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/dash_card"
+            android:padding="16dp"
+            android:layout_marginTop="12dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="THROTTLE RAMP" android:textColor="@color/text_secondary" android:textSize="12sp" android:letterSpacing="0.2" android:layout_marginBottom="6dp" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:paddingVertical="11dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Throttle ACC Step" android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="accel ramp · 0–224" android:textColor="@color/text_hint" android:textSize="10sp" />
+                </LinearLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnAccMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <TextView android:id="@+id/tvAccVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnAccPlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+            </LinearLayout>
+
+            <View style="@style/SettingsDivider" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:paddingVertical="11dp">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Throttle DEC Step" android:textColor="@color/text_primary" android:textSize="14sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="decel ramp · must stay &gt; ACC" android:textColor="@color/warning_amber" android:textSize="10sp" />
+                </LinearLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnDecMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <TextView android:id="@+id/tvDecVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnDecPlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+            </LinearLayout>
+
+            <TextView android:id="@+id/tvRampHint" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp"
+                android:text="DEC must stay above ACC. Range 0–224. Tap a number to apply." android:textColor="@color/text_hint" android:textSize="10.5sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

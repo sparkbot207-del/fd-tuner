@@ -66,6 +66,10 @@ class ParamsMenuFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
             this.adapter = sectionAdapter
         }
+
+        binding.btnQuickTune.setOnClickListener {
+            findNavController().navigate(R.id.action_paramsMenu_to_quickTune)
+        }
         sectionAdapter.submitList(viewModel.sections)
 
         // ---- Feature 3: add history menu via MenuProvider ----

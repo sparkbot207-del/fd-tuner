@@ -49,6 +49,18 @@
 
     </LinearLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnQuickTune"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/screen_padding"
+        android:layout_marginTop="10dp"
+        android:text="⚡  Quick Tune"
+        android:textStyle="bold"
+        app:backgroundTint="@color/pink_primary"
+        app:cornerRadius="12dp" />
+
     <!-- Section list (shown when search is empty) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerSections"

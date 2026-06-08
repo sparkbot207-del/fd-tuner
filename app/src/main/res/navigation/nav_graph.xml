@@ -41,6 +41,12 @@
             app:destination="@id/paramsSectionFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+
+        <action
+            android:id="@+id/action_paramsMenu_to_quickTune"
+            app:destination="@id/quickTuneFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <!-- Params section detail -->
@@ -161,5 +167,13 @@
             app:popUpTo="@id/snifferFragment"
             app:popUpToInclusive="false" />
     </fragment>
+
+
+    <!-- Quick Tune — gathered most-tuned params; entered from the Params menu -->
+    <fragment
+        android:id="@+id/quickTuneFragment"
+        android:name="com.bretthalliday.fdtuner.ui.params.QuickTuneFragment"
+        android:label="Quick Tune"
+        tools:layout="@layout/fragment_quick_tune" />
 
 </navigation>
