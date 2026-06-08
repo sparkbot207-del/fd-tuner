@@ -100,7 +100,7 @@ class DashboardFragment : Fragment() {
         binding.tvAPhase.text = "%.1f A".format(t.aPhaseCurrent)
         binding.tvCPhase.text = "%.1f A".format(t.cPhaseCurrent)
         binding.tvRpm.text = "${t.rpm} RPM"
-        binding.tvGear.text = when (t.gear) { 0 -> "N"; 1 -> "L"; 2 -> "M"; 3 -> "H"; else -> "?" }
+        binding.tvGear.text = when (t.gear) { 0 -> "Park"; 1 -> "1"; 2 -> "2"; 3 -> "3"; else -> "?" }
         binding.tvSoc.text = "${t.soc}%"
         binding.tvControllerTemp.text = "${t.controllerTemp}°C"
         binding.tvMotorTemp.text = "${t.motorTemp}°C"
