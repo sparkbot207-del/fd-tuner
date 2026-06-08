@@ -108,6 +108,12 @@
             app:destination="@id/analysisFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+
+        <action
+            android:id="@+id/action_snifferFragment_to_guidedCaptureFragment"
+            app:destination="@id/guidedCaptureFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <!-- Capture Analysis — shows monospace report from CaptureAnalyzer -->
@@ -138,5 +144,22 @@
         android:name="com.bretthalliday.fdtuner.ui.diagnostics.DiagnosticsFragment"
         android:label="Diagnostics"
         tools:layout="@layout/fragment_diagnostics" />
+
+
+    <!-- Guided Capture — stepper that auto-inserts annotation tags; entered from Sniffer -->
+    <fragment
+        android:id="@+id/guidedCaptureFragment"
+        android:name="com.bretthalliday.fdtuner.ui.sniffer.GuidedCaptureFragment"
+        android:label="Guided Capture"
+        tools:layout="@layout/fragment_guided_capture">
+
+        <action
+            android:id="@+id/action_guidedCaptureFragment_to_analysisFragment"
+            app:destination="@id/analysisFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popUpTo="@id/snifferFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
 
 </navigation>

@@ -98,6 +98,14 @@ object CaptureAnalyzer {
         val gear: Int
     )
 
+    /** Park segment vs stopped baseline: which bits flipped in a status word. */
+    data class ParkReport(
+        val addr: Int,
+        val parkMean: Double,
+        val stoppedMean: Double,
+        val flippedBits: List<Int>            // bit indices 0..15 that differ vs stopped
+    )
+
     data class AnalysisResult(
         val segments: List<Segment>,
         val responsiveAddrs: List<AddrSpread>,
@@ -105,6 +113,7 @@ object CaptureAnalyzer {
         val throttleCorrelations: List<ThrottleCorr>,
         val brakeDeltas: List<BrakeDelta>,
         val gearReports: List<GearReport>,
+        val parkReports: List<ParkReport>,
         val reportText: String
     )
 
@@ -119,9 +128,10 @@ object CaptureAnalyzer {
         val throttle    = computeThrottleCorrelation(segs)
         val brake       = computeBrakeDeltas(segs)
         val gear        = computeGearDirection(segs)
+        val park        = computeParkDeltas(segs)
         val report      = buildReport(packets.size, annotations.size,
-                                      segs, responsive, static, throttle, brake, gear)
-        return AnalysisResult(segs, responsive, static, throttle, brake, gear, report)
+                                      segs, responsive, static, throttle, brake, gear, park)
+        return AnalysisResult(segs, responsive, static, throttle, brake, gear, park, report)
     }
 
     // ── A + B. Segmentation + word stats ──────────────────────────────────────
@@ -210,27 +220,64 @@ object CaptureAnalyzer {
         return null
     }
 
-    private fun computeThrottleCorrelation(segs: List<Segment>): List<ThrottleCorr> {
-        val throttleSegs = segs.mapNotNull { seg ->
-            val level = throttleLevel(seg.tag) ?: return@mapNotNull null
-            level to seg
+    /** A segment is a throttle step if its tag mentions throttle or WOT (qualitative OK). */
+    internal fun isThrottleSegment(tag: String): Boolean {
+        val l = tag.lowercase()
+        return "throttle" in l || "wot" in l
+    }
+
+    /** Candidate addresses for the MEASURED throttle reference, in priority order. */
+    internal val THROTTLE_REF_ADDRS = listOf(0xF0, 0xE5)   // phase current, then RPM
+
+    /**
+     * Pick a measured reference for throttle response: mean phase-current magnitude (0xF0),
+     * or RPM (0xE5) if phase current is absent. Returns (refAddr, refValueBySegmentTag).
+     *
+     * Why measured, not the tag label: operators can only give qualitative throttle
+     * (low/mid/high/WOT), so we rank candidate words against a physical quantity that
+     * scales with throttle instead of a number parsed from the tag.
+     */
+    private fun throttleReference(throttleSegs: List<Segment>): Pair<Int, Map<String, Double>>? {
+        for (refAddr in THROTTLE_REF_ADDRS) {
+            val byTag = throttleSegs.mapNotNull { seg ->
+                seg.wordStats[refAddr]?.let { seg.tag to abs(it.mean) }
+            }.toMap()
+            // need >= 3 points and some spread, else correlation is meaningless
+            if (byTag.size >= 3 && byTag.values.toSet().size >= 2) return refAddr to byTag
         }
+        return null
+    }
+
+    private fun computeThrottleCorrelation(segs: List<Segment>): List<ThrottleCorr> {
+        val throttleSegs = segs.filter { isThrottleSegment(it.tag) }
         if (throttleSegs.size < 3) return emptyList()
 
-        // Only consider addresses present in >= 3 throttle segments
+        val ref = throttleReference(throttleSegs) ?: return emptyList()
+        val (refAddr, refByTag) = ref
+
+        // Keep only segments that have a reference value; correlate against that series.
+        val ordered = throttleSegs.filter { refByTag.containsKey(it.tag) }
+
+        // Candidate addresses present in >= 3 of these segments (exclude the reference itself).
         val addrCount = mutableMapOf<Int, Int>()
-        for ((_, seg) in throttleSegs) {
+        for (seg in ordered) {
             for (addr in seg.wordStats.keys) {
+                if (addr == refAddr) continue
                 addrCount[addr] = (addrCount[addr] ?: 0) + 1
             }
         }
 
+        // Keep "throttle 0 while still spinning" discriminator: a throttle/command word
+        // collapses toward its stopped baseline at throttle 0 (so it tracks the measured
+        // phase-current reference, which is ~0 there), while a pure speed word stays high
+        // and therefore does NOT track the reference.
         return addrCount.entries
             .filter { it.value >= 3 }
             .mapNotNull { (addr, _) ->
-                val pairs = throttleSegs.mapNotNull { (level, seg) ->
+                val pairs = ordered.mapNotNull { seg ->
                     val mean = seg.wordStats[addr]?.mean ?: return@mapNotNull null
-                    level to mean
+                    val refV = refByTag[seg.tag] ?: return@mapNotNull null
+                    refV to mean
                 }
                 if (pairs.size < 3) return@mapNotNull null
                 val rho = spearmanRho(pairs.map { it.first }, pairs.map { it.second })
@@ -268,6 +315,29 @@ object CaptureAnalyzer {
             val e2 = seg.wordStats[0xE2] ?: return@mapNotNull null
             val v  = e2.mean.toInt()
             GearReport(seg.tag, fwd = v and 1, rev = (v shr 1) and 1, gear = (v shr 2) and 0b11)
+        }
+    }
+
+    // ── G. Park state ──────────────────────────────────────────────────────────
+
+    /**
+     * Locate the park state bit: diff the `park` segment against the `stopped` baseline
+     * and report flipped bits in the status words 0xE2 / 0xE3.
+     */
+    private fun computeParkDeltas(segs: List<Segment>): List<ParkReport> {
+        val parkSeg = segs.firstOrNull { "park" in it.tag.lowercase() }
+            ?: return emptyList()
+        val stoppedSeg = segs.firstOrNull { "stopped" in it.tag.lowercase() }
+            ?: segs.firstOrNull { it.tag == "(untagged)" }
+            ?: return emptyList()
+
+        return listOf(0xE2, 0xE3).mapNotNull { addr ->
+            val p = parkSeg.wordStats[addr] ?: return@mapNotNull null
+            val st = stoppedSeg.wordStats[addr] ?: return@mapNotNull null
+            val xor = p.mean.toInt() xor st.mean.toInt()
+            val flipped = (0..15).filter { (xor shr it) and 1 == 1 }
+            if (flipped.isEmpty() && abs(p.mean - st.mean) <= 0.5) return@mapNotNull null
+            ParkReport(addr, p.mean, st.mean, flipped)
         }
     }
 
@@ -319,7 +389,8 @@ object CaptureAnalyzer {
         static: List<AddrSpread>,
         throttle: List<ThrottleCorr>,
         brake: List<BrakeDelta>,
-        gear: List<GearReport>
+        gear: List<GearReport>,
+        park: List<ParkReport>
     ): String = buildString {
 
         appendLine("=== FARDRIVER CAPTURE ANALYSIS ===")
@@ -370,11 +441,11 @@ object CaptureAnalyzer {
 
         // --- Throttle correlation
         appendLine(DIV)
-        appendLine(" THROTTLE CORRELATION  (Spearman |rho| ranked)")
+        appendLine(" THROTTLE CORRELATION  (Spearman |rho| vs measured phase-current/RPM ref)")
         appendLine(DIV)
         if (throttle.isEmpty()) {
-            appendLine("  (fewer than 3 throttle segments —")
-            appendLine("   use tags like 'throttle 25%', 'throttle 50%', 'wot', etc.)")
+            appendLine("  (need >= 3 throttle segments with a measured reference —")
+            appendLine("   tag steps 'throttle low/mid/high' and 'WOT'.)")
         } else {
             for (c in throttle) {
                 val flag = if (c.tracksThrottle) "  ** TRACKS THROTTLE **" else ""
@@ -412,6 +483,23 @@ object CaptureAnalyzer {
             for (g in gear) {
                 appendLine("  [%-22s]  fwd=%d  rev=%d  gear=%d"
                     .format(g.segmentTag.take(22), g.fwd, g.rev, g.gear))
+            }
+        }
+        appendLine()
+
+        // --- Park state
+        appendLine(DIV)
+        appendLine(" PARK STATE  (park segment vs stopped baseline, 0xE2 / 0xE3)")
+        appendLine(DIV)
+        if (park.isEmpty()) {
+            appendLine("  (no 'park' segment, or no bit change vs stopped baseline)")
+        } else {
+            for (pr in park) {
+                appendLine("  0x%02X  %s".format(pr.addr, label(pr.addr)))
+                appendLine("        park=%.1f  stopped=%.1f".format(pr.parkMean, pr.stoppedMean))
+                if (pr.flippedBits.isNotEmpty()) {
+                    appendLine("        park bit(s): ${pr.flippedBits}")
+                }
             }
         }
     }

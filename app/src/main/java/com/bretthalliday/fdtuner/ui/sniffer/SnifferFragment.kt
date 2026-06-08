@@ -102,6 +102,10 @@ class SnifferFragment : Fragment() {
         }
 
         // Toolbar actions
+        binding.btnGuidedCapture.setOnClickListener {
+            findNavController().navigate(R.id.action_snifferFragment_to_guidedCaptureFragment)
+        }
+
         binding.btnAnalyze.setOnClickListener {
             findNavController().navigate(R.id.action_snifferFragment_to_analysisFragment)
         }

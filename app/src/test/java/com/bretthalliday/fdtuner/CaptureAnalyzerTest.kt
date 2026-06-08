@@ -42,64 +42,65 @@ class CaptureAnalyzerTest {
     fun throttleSweep_throttleAddrRanksTop_speedAddrDoesNot() {
         tsCounter = 0L
 
-        // Segment timestamps (each annotation fires before its packets)
-        val tStop  = ts()   //  100 — "throttle 0" while spinning
-        val tT25   = ts()   //  200 — "throttle 25%"
-        val tT50   = ts()   //  300 — "throttle 50%"
-        val tT75   = ts()   //  400 — "throttle 75%"
-        val tWot   = ts()   //  500 — "wot"
+        val tStop = ts()   // "throttle 0" while still spinning (coasting)
+        val tLow  = ts()   // "throttle low"
+        val tMid  = ts()   // "throttle mid"
+        val tHigh = ts()   // "throttle high"
+        val tWot  = ts()   // "WOT"
 
-        // Addr 0xE7 = "throttle req" — tracks throttle linearly (rho should be ~1.0)
-        // Addr 0xE5 = "RPM"         — high at throttle 0 (coasting), breaks monotonicity
+        // Throttle steps are QUALITATIVE (no % in the tag). Ranking is done against a
+        // MEASURED reference (0xF0 phase current), not the tag label.
+        //  0xF0 = phase-current reference — scales with throttle, ~0 at throttle 0
+        //  0xE7 = throttle command       — tracks the reference (rho ~ 1.0)
+        //  0xE5 = RPM/speed              — high at throttle 0 (coasting), breaks the ranking
         val packets = mutableListOf<SniffPacket>().apply {
-            addAll(segPackets(mapOf(0xE5 to 2000, 0xE7 to 0),   tStop))  // coasting
-            addAll(segPackets(mapOf(0xE5 to 500,  0xE7 to 25),  tT25))
-            addAll(segPackets(mapOf(0xE5 to 1000, 0xE7 to 50),  tT50))
-            addAll(segPackets(mapOf(0xE5 to 1500, 0xE7 to 75),  tT75))
-            addAll(segPackets(mapOf(0xE5 to 2000, 0xE7 to 100), tWot))
+            addAll(segPackets(mapOf(0xF0 to 0,    0xE7 to 0,   0xE5 to 2000), tStop))
+            addAll(segPackets(mapOf(0xF0 to 300,  0xE7 to 25,  0xE5 to 500),  tLow))
+            addAll(segPackets(mapOf(0xF0 to 600,  0xE7 to 50,  0xE5 to 1000), tMid))
+            addAll(segPackets(mapOf(0xF0 to 900,  0xE7 to 75,  0xE5 to 1500), tHigh))
+            addAll(segPackets(mapOf(0xF0 to 1200, 0xE7 to 100, 0xE5 to 2000), tWot))
         }
 
         val annotations = listOf(
             tStop to "throttle 0",
-            tT25  to "throttle 25%",
-            tT50  to "throttle 50%",
-            tT75  to "throttle 75%",
-            tWot  to "wot"
+            tLow  to "throttle low",
+            tMid  to "throttle mid",
+            tHigh to "throttle high",
+            tWot  to "WOT"
         )
 
         val result = CaptureAnalyzer.analyze(packets, annotations)
 
-        // At least 2 correlated addresses returned
         assertTrue("Expected throttle correlations", result.throttleCorrelations.isNotEmpty())
 
-        // 0xE7 must rank first (highest |rho|)
+        // The reference addr itself (0xF0) must be excluded from the ranking.
+        assertNull(
+            "Reference addr 0xF0 must not be ranked against itself",
+            result.throttleCorrelations.firstOrNull { it.addr == 0xF0 }
+        )
+
+        // 0xE7 (throttle command) must rank #1 and track throttle.
         assertEquals(
-            "0xE7 (throttle req) should rank #1 in throttle correlation",
+            "0xE7 (throttle command) should rank #1 in throttle correlation",
             0xE7,
             result.throttleCorrelations.first().addr
         )
-
-        // 0xE7 must be flagged TRACKS THROTTLE
         assertTrue(
             "0xE7 should be flagged TRACKS THROTTLE (|rho| > 0.85)",
             result.throttleCorrelations.first().tracksThrottle
         )
-
-        // 0xE7 rho must be very high (perfect linear match → ≥ 0.99)
         assertTrue(
             "0xE7 rho should be >= 0.99, was ${result.throttleCorrelations.first().rho}",
             result.throttleCorrelations.first().rho >= 0.99
         )
 
-        // 0xE5 must rank below 0xE7
+        // 0xE5 (speed) must rank below 0xE7 and NOT track throttle (stays high at throttle 0).
         val e5Corr = result.throttleCorrelations.firstOrNull { it.addr == 0xE5 }
         assertNotNull("0xE5 should appear in throttle correlations", e5Corr)
         assertTrue(
             "0xE5 |rho| should be < 0xE7 |rho|",
             Math.abs(e5Corr!!.rho) < result.throttleCorrelations.first().rho
         )
-
-        // 0xE5 must NOT be flagged as TRACKS THROTTLE (its rho ≈ 0.2)
         assertFalse(
             "0xE5 should NOT be flagged TRACKS THROTTLE",
             e5Corr.tracksThrottle
@@ -107,6 +108,34 @@ class CaptureAnalyzerTest {
 
         // Sanity: report text must contain the TRACKS THROTTLE flag
         assertTrue(result.reportText.contains("TRACKS THROTTLE"))
+    }
+
+    // ── 1b. Park state bit-flip ────────────────────────────────────────────────
+
+    @Test
+    fun parkSegment_flippedBitReported() {
+        tsCounter = 0L
+
+        val tStopped = ts()
+        val tPark    = ts()
+
+        // 0xE2: stopped baseline = 0, park = 8 (bit 3 set). 0xE3 unchanged → not reported.
+        val packets = mutableListOf<SniffPacket>().apply {
+            addAll(segPackets(mapOf(0xE2 to 0, 0xE3 to 0), tStopped))
+            addAll(segPackets(mapOf(0xE2 to 8, 0xE3 to 0), tPark))
+        }
+        val annotations = listOf(
+            tStopped to "stopped",
+            tPark    to "park"
+        )
+
+        val result = CaptureAnalyzer.analyze(packets, annotations)
+
+        assertTrue("Expected park reports", result.parkReports.isNotEmpty())
+        val e2 = result.parkReports.firstOrNull { it.addr == 0xE2 }
+        assertNotNull("0xE2 should appear in park reports", e2)
+        assertEquals("Only bit 3 should flip vs stopped baseline", listOf(3), e2!!.flippedBits)
+        assertTrue("Park report section present", result.reportText.contains("PARK STATE"))
     }
 
     // ── 2. Brake bit-flip ──────────────────────────────────────────────────────
