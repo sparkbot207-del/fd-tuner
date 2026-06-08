@@ -27,6 +27,9 @@ class ParamsViewModel(
         ParamDefinitions.SECTIONS.flatMap { ParamDefinitions.forSection(it) }
     }
 
+    /** Read-only live state/telemetry params shown on the Diagnostics screen. */
+    val diagnosticsParams: List<ParamDef> = ParamDefinitions.diagnosticsParams
+
     val isDemo: Boolean get() = bleManager.isDemo
 
     /**

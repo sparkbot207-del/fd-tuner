@@ -68,6 +68,12 @@
             app:destination="@id/snifferFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+
+        <action
+            android:id="@+id/action_settings_to_diagnostics"
+            app:destination="@id/diagnosticsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
 
     <!-- Profiles (bottom nav tab 4) -->
@@ -124,5 +130,13 @@
             android:defaultValue="0" />
     </fragment>
 
+
+
+    <!-- Diagnostics — read-only live state/telemetry; entered from Settings -->
+    <fragment
+        android:id="@+id/diagnosticsFragment"
+        android:name="com.bretthalliday.fdtuner.ui.diagnostics.DiagnosticsFragment"
+        android:label="Diagnostics"
+        tools:layout="@layout/fragment_diagnostics" />
 
 </navigation>

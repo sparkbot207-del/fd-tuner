@@ -1,6 +1,7 @@
 package com.bretthalliday.fdtuner.data
 
 import com.bretthalliday.fdtuner.model.ParamDef
+import com.bretthalliday.fdtuner.model.GeneratedParamDefs
 
 /**
  * Complete parameter definitions for all 10 sections.
@@ -21,6 +22,8 @@ object ParamDefinitions {
     const val SECTION_PID = "PID Paras"
     const val SECTION_PRODUCT = "Product"
     const val SECTION_FIXED = "FixedParas"
+    /** Read-only live state/telemetry (blocks D6/E2/E8/EE/F4/FA). Never writable, never in the editor. */
+    const val SECTION_DIAGNOSTICS = "Diagnostics"
 
     val SECTIONS = listOf(
         SECTION_PARAMETERS,
@@ -1193,9 +1196,12 @@ object ParamDefinitions {
         )
     )
 
-    // ---- Combined map & accessors ----
+    // ---- Curated (hand-built) defs: kept only for their safety bounds, flags & notes ----
+    // The complete, authoritative set comes from GeneratedParamDefs (HPP). We merge the curated
+    // richer fields (min/max write bounds, isSafetyCritical, notes) onto matching generated
+    // entries by name, so regenerating the HPP set never loses curated safety polish.
 
-    val allParams: List<ParamDef> =
+    private val curatedParams: List<ParamDef> =
         parametersSection +
         ratiosSpeedSection +
         ratiosGearSection +
@@ -1207,7 +1213,54 @@ object ParamDefinitions {
         productSection +
         fixedParasSection
 
+    private val curatedByName: Map<String, ParamDef> = curatedParams.associateBy { it.name }
+
+    /**
+     * Per-field polish applied over the generated set. Re-running the generator never loses this.
+     * Each entry transforms the generated ParamDef (usually via .copy()).
+     */
+    val OVERRIDES: Map<String, (ParamDef) -> ParamDef> = mapOf(
+        // --- unit corrections (generator infers units from scale; some are wrong) ---
+        "PhaseOffset"       to { p: ParamDef -> p.copy(unit = "\u00B0") },   // degrees, not V
+        "MotorTempProtect"  to { p: ParamDef -> p.copy(unit = "\u00B0C") },
+        "MosTempProtect"    to { p: ParamDef -> p.copy(unit = "\u00B0C") },
+        "MotorTempRestore"  to { p: ParamDef -> p.copy(unit = "\u00B0C") },
+        "MosTempRestore"    to { p: ParamDef -> p.copy(unit = "\u00B0C") },
+        // --- section placement requested by the user ---
+        "ReCurrRatio"       to { p: ParamDef -> p.copy(section = SECTION_PRODUCT) }
+        // --- add confirmed scales/units for newly-decoded fields here as the sniffer reveals them ---
+    )
+
+    /**
+     * Carry curated safety metadata (write bounds, safety flag, notes) onto a generated def.
+     * Addresses / bit layout / scale come from the generated set and are never overwritten here.
+     */
+    private fun mergeCurated(def: ParamDef): ParamDef {
+        val c = curatedByName[def.name] ?: return def
+        val hasCuratedBounds = c.minVal != 0 || c.maxVal != 9999
+        return def.copy(
+            minVal = if (hasCuratedBounds) c.minVal else def.minVal,
+            maxVal = if (hasCuratedBounds) c.maxVal else def.maxVal,
+            isSafetyCritical = def.isSafetyCritical || c.isSafetyCritical,
+            notes = if (def.notes.isEmpty()) c.notes else def.notes
+        )
+    }
+
+    /** Effective, complete parameter set the app should use everywhere. */
+    val ALL_PARAMS: List<ParamDef> =
+        GeneratedParamDefs.all
+            .map { mergeCurated(it) }
+            .map { def -> OVERRIDES[def.name]?.invoke(def) ?: def }
+
+    // ---- Public accessors (now backed by the complete generated set) ----
+
+    val allParams: List<ParamDef> = ALL_PARAMS
+
     val bySection: Map<String, List<ParamDef>> = allParams.groupBy { it.section }
 
     fun forSection(section: String): List<ParamDef> = bySection[section] ?: emptyList()
+
+    /** Read-only live state/telemetry params for the Diagnostics screen (never writable). */
+    val diagnosticsParams: List<ParamDef> =
+        allParams.filter { it.isReadOnly || it.section == SECTION_DIAGNOSTICS }
 }

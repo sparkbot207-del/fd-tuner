@@ -399,6 +399,17 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Diagnostics — read-only live state/telemetry view -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenDiagnostics"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="16dp"
+            android:text="🩺  Diagnostics (live state)"
+            android:textColor="@color/cyan_accent"
+            app:strokeColor="@color/cyan_accent" />
+
         <!-- About section -->
         <TextView
             android:layout_width="wrap_content"

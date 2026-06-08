@@ -126,6 +126,10 @@ class SettingsFragment : Fragment() {
             findNavController().navigate(R.id.action_settings_to_sniffer)
         }
 
+        binding.btnOpenDiagnostics.setOnClickListener {
+            findNavController().navigate(R.id.action_settings_to_diagnostics)
+        }
+
         // ---- About ----
         binding.tvAppVersion.text = "Fardriver Whisperer v${BuildConfig.VERSION_NAME}"
         binding.tvAppNotes.text =
