@@ -57,10 +57,10 @@ class QuickTuneFragment : Fragment() {
 
         setupCurve()
         setupWeakResponse()
-        setupStepper(lineParam, binding.tvLineVal, binding.btnLineMinus, binding.btnLinePlus, 5, 0, 9999)
-        setupStepper(phaseParam, binding.tvPhaseVal, binding.btnPhaseMinus, binding.btnPhasePlus, 5, 0, 9999)
-        setupStepper(accParam, binding.tvAccVal, binding.btnAccMinus, binding.btnAccPlus, 2, 0, 224)
-        setupStepper(decParam, binding.tvDecVal, binding.btnDecMinus, binding.btnDecPlus, 2, 0, 224)
+        setupStepper(lineParam, binding.tvLineVal, binding.btnLineMinus, binding.btnLinePlus, binding.btnLineApply, 5, 0, 9999)
+        setupStepper(phaseParam, binding.tvPhaseVal, binding.btnPhaseMinus, binding.btnPhasePlus, binding.btnPhaseApply, 5, 0, 9999)
+        setupStepper(accParam, binding.tvAccVal, binding.btnAccMinus, binding.btnAccPlus, binding.btnAccApply, 2, 0, 224)
+        setupStepper(decParam, binding.tvDecVal, binding.btnDecMinus, binding.btnDecPlus, binding.btnDecApply, 2, 0, 224)
 
         binding.btnResetCurve.setOnClickListener { resetCurve() }
 
@@ -228,17 +228,22 @@ class QuickTuneFragment : Fragment() {
 
     // ---- steppers ----
 
-    private fun setupStepper(param: ParamDef?, tv: TextView, minus: View, plus: View, step: Int, lo: Int, hi: Int) {
-        val name = param?.name ?: return tv.let { it.text = "—" }
+    private val applyButtons = HashMap<String, View>()
+
+    private fun setupStepper(param: ParamDef?, tv: TextView, minus: View, plus: View, apply: View, step: Int, lo: Int, hi: Int) {
+        if (param == null) { tv.text = "—"; apply.isEnabled = false; return }
+        val name = param.name
+        applyButtons[name] = apply
+        apply.isEnabled = false
         minus.setOnClickListener { stepStaged(param, tv, -step, lo, hi) }
         plus.setOnClickListener { stepStaged(param, tv, step, lo, hi) }
-        tv.setOnClickListener {
-            val v = staged[name] ?: liveDisplay(param) ?: return@setOnClickListener
+        apply.setOnClickListener {
+            val v = staged[name] ?: return@setOnClickListener
             if (!rampValid(param, v)) {
                 Toast.makeText(requireContext(), "DEC must stay greater than ACC.", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
-            confirmAndWrite(param, v) { dirty.remove(name) }
+            confirmAndWrite(param, v) { dirty.remove(name); apply.isEnabled = false }
         }
     }
 
@@ -248,6 +253,7 @@ class QuickTuneFragment : Fragment() {
         val next = (base + delta).coerceIn(lo, hi)
         staged[name] = next
         dirty += name
+        applyButtons[name]?.isEnabled = true
         renderStepperText(param, tv)
         updateRampHint()
     }
@@ -287,7 +293,10 @@ class QuickTuneFragment : Fragment() {
         listOf(lineParam to binding.tvLineVal, phaseParam to binding.tvPhaseVal,
                accParam to binding.tvAccVal, decParam to binding.tvDecVal).forEach { (p, tv) ->
             if (p == null) { tv.text = "—"; return@forEach }
-            if (p.name !in dirty) staged.remove(p.name)   // not mid-edit -> follow live
+            if (p.name !in dirty) {                       // not mid-edit -> follow live
+                staged.remove(p.name)
+                applyButtons[p.name]?.isEnabled = false
+            }
             renderStepperText(p, tv)
         }
         updateRampHint()

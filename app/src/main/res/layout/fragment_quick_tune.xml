@@ -138,8 +138,9 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="battery / bus current" android:textColor="@color/text_hint" android:textSize="10sp" />
                 </LinearLayout>
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnLineMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
-                <TextView android:id="@+id/tvLineVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <TextView android:id="@+id/tvLineVal" android:layout_width="56dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnLinePlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnLineApply" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="4dp" android:minWidth="0dp" android:paddingHorizontal="10dp" android:text="Apply" android:textColor="@color/cyan_accent" android:textSize="12sp" android:enabled="false" />
             </LinearLayout>
 
             <View style="@style/SettingsDivider" />
@@ -151,12 +152,13 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="keep ≥ line · motor current" android:textColor="@color/warning_amber" android:textSize="10sp" />
                 </LinearLayout>
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnPhaseMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
-                <TextView android:id="@+id/tvPhaseVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <TextView android:id="@+id/tvPhaseVal" android:layout_width="56dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnPhasePlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnPhaseApply" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="4dp" android:minWidth="0dp" android:paddingHorizontal="10dp" android:text="Apply" android:textColor="@color/cyan_accent" android:textSize="12sp" android:enabled="false" />
             </LinearLayout>
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp"
-                android:text="Tap the number to apply (each change confirms)." android:textColor="@color/text_hint" android:textSize="10.5sp" />
+                android:text="Use − / + then Apply. Each change confirms before writing." android:textColor="@color/text_hint" android:textSize="10.5sp" />
         </LinearLayout>
 
         <!-- ===== THROTTLE RAMP ===== -->
@@ -178,8 +180,9 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="accel ramp · 0–224" android:textColor="@color/text_hint" android:textSize="10sp" />
                 </LinearLayout>
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnAccMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
-                <TextView android:id="@+id/tvAccVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <TextView android:id="@+id/tvAccVal" android:layout_width="56dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnAccPlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnAccApply" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="4dp" android:minWidth="0dp" android:paddingHorizontal="10dp" android:text="Apply" android:textColor="@color/cyan_accent" android:textSize="12sp" android:enabled="false" />
             </LinearLayout>
 
             <View style="@style/SettingsDivider" />
@@ -191,12 +194,13 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="decel ramp · must stay &gt; ACC" android:textColor="@color/warning_amber" android:textSize="10sp" />
                 </LinearLayout>
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnDecMinus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="−" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
-                <TextView android:id="@+id/tvDecVal" android:layout_width="80dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
+                <TextView android:id="@+id/tvDecVal" android:layout_width="56dp" android:layout_height="wrap_content" android:gravity="center" android:text="—" android:textColor="@color/text_primary" android:textSize="20sp" android:textStyle="bold" android:fontFeatureSettings="tnum" />
                 <com.google.android.material.button.MaterialButton android:id="@+id/btnDecPlus" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="40dp" android:layout_height="40dp" android:insetTop="0dp" android:insetBottom="0dp" android:padding="0dp" android:text="+" android:textColor="@color/pink_primary" android:textSize="20sp" app:strokeColor="@color/divider" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnDecApply" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_marginStart="4dp" android:minWidth="0dp" android:paddingHorizontal="10dp" android:text="Apply" android:textColor="@color/cyan_accent" android:textSize="12sp" android:enabled="false" />
             </LinearLayout>
 
             <TextView android:id="@+id/tvRampHint" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp"
-                android:text="DEC must stay above ACC. Range 0–224. Tap a number to apply." android:textColor="@color/text_hint" android:textSize="10.5sp" />
+                android:text="DEC must stay above ACC. Range 0–224." android:textColor="@color/text_hint" android:textSize="10.5sp" />
         </LinearLayout>
 
     </LinearLayout>
