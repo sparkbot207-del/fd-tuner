@@ -88,6 +88,23 @@ Complete Android app for controlling Fardriver e-bike motor controllers via BLE.
 - **Min SDK**: 26 (Android 8.0) | **Target/Compile**: 34
 - **Deps**: Material3, Navigation, Lifecycle, Coroutines, RecyclerView
 
+#### Fixes (Protocol Session — 2026-06-08)
+- [0d45602] Fix: protocol RPM scale, addresses, speed calc, unit suffix (7 fixes from reverse engineering)
+  - Fix 1: RPM scale=4f on MaxSpeed, RatedSpeed, BackSpeed, LowSpeed, MidSpeed (raw = mechanical_RPM × 4)
+  - Fix 2: Speed formula now uses raw/4 instead of raw/polePairs; divides by 4 first, then multiplies by circumference
+  - Fix 3: Motor Direction bitShift=7 (already correct, no change needed)
+  - Fix 4: formatDisplay() no longer appends unit (tvParamUnit handles it separately)
+  - Fix 5: Ratios in Speed completely corrected: 20 percentage params at 0x88–0x91 lo/hi bytes (not 0x30–0x41)
+  - Fix 6: Add/move missing params: LD(0x12), LQ(0x1B), FAIF(0x09), LimitSpeed(0x6C, scale=4f)
+  - Fix 7: Ratios in Gear addresses: Line/Phase ratios at 0x32–0x33 (formula: pct = raw×100/128)
+  - DemoDataSource: all RPM raw values scaled ×4 for protocol consistency
+  - Validated against live ND72680_24_A_H9 (MaxSpeed 12000 raw → 3000 RPM ✓)
+- [557ad61] Fix: remove BLE scan filters blocking FarDriver discovery
+  - Removed service UUID pre-filter (HM-10/BT05 modules don't broadcast service UUID in ads)
+  - Replaced hard name-reject with soft pattern matching (Ratio @ …RPM params now map to correct addresses and store percentages only)
+  - Added likelyFardriver flag; devices sorted by likelihood then RSSI, with ⚡ badge in scan list
+  - Tested with nRF Connect to verify actual advertised name
+
 #### Fixes (Build Session)
 - [015eef2] Fix: switch to NoActionBar theme to allow Toolbar setSupportActionBar
 - [d99a323] Fix: getDefaultViewModelProviderFactory → property override for lifecycle 2.7+
