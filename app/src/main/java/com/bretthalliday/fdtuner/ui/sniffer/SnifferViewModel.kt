@@ -133,7 +133,7 @@ class SnifferViewModel(private val bleManager: FardriverBleManager) : ViewModel(
                           "\"${p.rawHex}\",$wordCols,\n")
             } else {
                 // Annotation marker row — empty packet fields, tag in last column
-                sb.append("${row.ts},,,,,,,,,,,,,,\"${row.tag ?: ""}\"\n")
+                sb.append("${row.ts},,,,,,,,,,,,,,,,\"${row.tag ?: ""}\"\n")
             }
         }
         return sb.toString()

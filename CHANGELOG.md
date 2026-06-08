@@ -1,5 +1,49 @@
 # FD Tuner — Changelog
 
+## [1.2.0] - 2026-06-08 (Packet Sniffer + Telemetry Fixes)
+
+### New Features
+
+**Feature 1 — Packet Sniffer (Dev-Mode Diagnostics)**
+- Read-only raw packet capture tool for decoding unknown words (per_mille, unk3/unk4, pin states, param banks)
+- `SniffPacket` data class: timestampMs, id, baseAddr, rawHex (16 bytes), words (Map<wordAddr, uint16>)
+- `FardriverBleManager.sniffPackets` SharedFlow (replay=0, 256-buffer) emits after every parseStatusPacket
+- `SnifferViewModel`: latestByAddress StateFlow, changedAddresses SharedFlow, session ring buffer (5k cap), per-word session min/max, annotation list (timestamp+tag)
+- `SnifferFragment`: RecyclerView of 34 block addresses, rows flash orange on word change, tap for detail, annotation bar with free-text + quick-tag buttons (brake, throttle 25/50/WOT, rolling, stopped)
+- `SnifferDetailFragment`: 6-word detail view with session min/max per word, live hex flash, raw packet hex footer
+- CSV export merges packet log + annotations (FileProvider via cacheDir, matches ProfilesFragment pattern)
+- Demo mode: synthesises SniffPackets from DemoDataSource.rawParams so sniffer works offline
+- Settings: Dev Mode SwitchMaterial (persists dev_mode, default false), "Packet Sniffer" button appears when on
+- Zero BLE writes anywhere — strictly observational
+
+### Bug Fixes
+
+**Telemetry Address Corrections** (commit 199ba10)
+- TelemetryData: added aPhaseCurrent, cPhaseCurrent, errorFlags fields
+- FardriverProtocol.decodeTelemetry():
+  - voltage: 0xE2 (flags) → 0xE8 (deci_volts)
+  - lineCurrent: 0xE3 → 0xEA (int16 ÷4, not ÷10)
+  - phase currents: 0xF0/0xF1/0xF2 (24-bit big-endian, formula 1.953125 × √raw24 = amps RMS)
+  - speed formula verified correct (mechanicalRpm ÷4 × wheelCirc × 60/1000)
+- DashboardFragment: relabeled "CURRENT" → "BATTERY A", added orange Phase A/C current cards
+- ParamDefinitions.kt: RatioMin label corrected
+
+**ParamDefinitions Reconciliation Against HPP Field Map** (commit eed01cc)
+- Motor Direction: added `isHiByte=true` (was reading wrong bit entirely)
+- TempSensor: `isLoByte=true`, bitShift 3→4
+- HighVolRestore: addr null→0x83
+- MotorTempProtect: addr null→0x84, `isLoByte=true`
+- MosTempProtect: addr null→0x85, `isLoByte=true`
+- Gear in FUNCTIONS: `isLoByte→isHiByte` (wrong byte), renamed GearConfig
+- Cruise/EABS: added `isLoByte=true`, fixed bitShifts (0→4, 2→5)
+- CruiseEnable/EABSEnable in PRODUCT: fixed bit positions
+- MaxAcc, MaxDec, RateRatio: added to FUNCTIONS and DISPLAY sections
+
+**ParamDef.isWritable Gate on isReadOnly** (commit 199ba10)
+- `isWritable` now checks `addr != null && !isReadOnly`
+- Params with `isReadOnly=true` are dim/no-tap (same as null-addr params)
+- Added three read-only live-readout params: ThrottleVoltage (0x82), AVGPower (0xD1), AVGSpeed (0xD3)
+
 ## [1.1.0] - 2026-06-07
 
 ### New Features
