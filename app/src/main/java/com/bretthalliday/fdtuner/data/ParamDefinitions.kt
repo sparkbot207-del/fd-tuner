@@ -1213,8 +1213,6 @@ object ParamDefinitions {
         productSection +
         fixedParasSection
 
-    private val curatedByName: Map<String, ParamDef> = curatedParams.associateBy { it.name }
-
     /**
      * Per-field polish applied over the generated set. Re-running the generator never loses this.
      * Each entry transforms the generated ParamDef (usually via .copy()).
@@ -1231,32 +1229,37 @@ object ParamDefinitions {
         // --- add confirmed scales/units for newly-decoded fields here as the sniffer reveals them ---
     )
 
-    /**
-     * Carry curated safety metadata (write bounds, safety flag, notes) onto a generated def.
-     * Addresses / bit layout / scale come from the generated set and are never overwritten here.
-     */
-    private fun mergeCurated(def: ParamDef): ParamDef {
-        val c = curatedByName[def.name] ?: return def
-        val hasCuratedBounds = c.minVal != 0 || c.maxVal != 9999
-        return def.copy(
-            minVal = if (hasCuratedBounds) c.minVal else def.minVal,
-            maxVal = if (hasCuratedBounds) c.maxVal else def.maxVal,
-            isSafetyCritical = def.isSafetyCritical || c.isSafetyCritical,
-            notes = if (def.notes.isEmpty()) c.notes else def.notes
-        )
-    }
+    /** Physical-location identity of a field: same address + byte + bit = same field. */
+    private fun physicalKey(p: ParamDef): String =
+        "${p.addr}:${p.isLoByte}:${p.isHiByte}:${p.bitMask}:${p.bitShift}"
 
-    /** Effective, complete parameter set the app should use everywhere. */
-    val ALL_PARAMS: List<ParamDef> =
-        GeneratedParamDefs.all
-            .map { mergeCurated(it) }
+    /**
+     * Effective, complete parameter set.
+     *  - Curated defs that have a real address are authoritative (names, sections, units, bounds).
+     *  - Curated placeholders with addr == null are dropped (generated provides the real address).
+     *  - Generated defs are added ONLY for physical fields not already covered by a curated def.
+     *  - OVERRIDES applied last.
+     */
+    val ALL_PARAMS: List<ParamDef> = run {
+        val curatedReal = curatedParams.filter { it.addr != null }
+        val coveredKeys = curatedReal.map { physicalKey(it) }.toSet()
+        val generatedExtra = GeneratedParamDefs.all.filter { physicalKey(it) !in coveredKeys }
+        (curatedReal + generatedExtra)
+            // Guard: collapse any residual physical-location duplicates so no field appears
+            // twice. Curated entries are listed first so curated wins over generated, and the
+            // first-listed section wins among curated-internal dupes. (A handful of curated
+            // entries map two names to the same word — see commit notes.)
+            .distinctBy { physicalKey(it) }
             .map { def -> OVERRIDES[def.name]?.invoke(def) ?: def }
+    }
 
     // ---- Public accessors (now backed by the complete generated set) ----
 
     val allParams: List<ParamDef> = ALL_PARAMS
 
-    val bySection: Map<String, List<ParamDef>> = allParams.groupBy { it.section }
+    val bySection: Map<String, List<ParamDef>> =
+        allParams.groupBy { it.section }
+            .mapValues { (_, list) -> list.sortedWith(compareBy({ it.addr ?: Int.MAX_VALUE }, { it.bitShift })) }
 
     fun forSection(section: String): List<ParamDef> = bySection[section] ?: emptyList()
 
