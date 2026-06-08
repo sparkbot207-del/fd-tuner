@@ -83,6 +83,8 @@ class DashboardFragment : Fragment() {
             binding.tvSpeedUnit.text = "mph"
             binding.tvVoltage.text = "--.- V"
             binding.tvCurrent.text = "--.- A"
+            binding.tvAPhase.text = "--.- A"
+            binding.tvCPhase.text = "--.- A"
             binding.tvRpm.text = "---- RPM"
             binding.tvGear.text = "-"
             binding.tvSoc.text = "--%"
@@ -95,8 +97,10 @@ class DashboardFragment : Fragment() {
         binding.tvSpeedUnit.text = t.speedUnit
         binding.tvVoltage.text = "%.1f V".format(t.voltage)
         binding.tvCurrent.text = "%.1f A".format(t.lineCurrent)
+        binding.tvAPhase.text = "%.1f A".format(t.aPhaseCurrent)
+        binding.tvCPhase.text = "%.1f A".format(t.cPhaseCurrent)
         binding.tvRpm.text = "${t.rpm} RPM"
-        binding.tvGear.text = t.gear
+        binding.tvGear.text = when (t.gear) { 0 -> "N"; 1 -> "L"; 2 -> "M"; 3 -> "H"; else -> "?" }
         binding.tvSoc.text = "${t.soc}%"
         binding.tvControllerTemp.text = "${t.controllerTemp}°C"
         binding.tvMotorTemp.text = "${t.motorTemp}°C"

@@ -116,18 +116,19 @@ object DemoDataSource {
                 val speedKmh = rpm.toDouble() * circumM * 60.0 / 1000.0
                 val speedMph = speedKmh * 0.621371
 
-                val gearStr = when (gear) { 0 -> "N"; 1 -> "L"; 2 -> "M"; else -> "H" }
-
                 _telemetry.value = TelemetryData(
                     voltage = voltage.toFloat(),
                     lineCurrent = current.toFloat(),
+                    aPhaseCurrent = 0f,   // not simulated in demo
+                    cPhaseCurrent = 0f,   // not simulated in demo
                     rpm = rpm,
-                    gear = gearStr,
                     speed = speedMph.toFloat(),
                     speedUnit = "mph",
                     controllerTemp = ctrlTemp,
                     motorTemp = motorTemp,
-                    soc = soc
+                    soc = soc,
+                    gear = gear,          // Int: 0=N, 1=L, 2=M, 3=H
+                    errorFlags = 0
                 )
 
                 tick++

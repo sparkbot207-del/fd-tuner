@@ -1,6 +1,7 @@
 package com.bretthalliday.fdtuner.ble
 
 import com.bretthalliday.fdtuner.model.TelemetryData
+import kotlin.math.sqrt
 
 /**
  * Fardriver BLE protocol: CRC, packet building, and status packet parsing.
@@ -160,50 +161,69 @@ object FardriverProtocol {
         wheelCircumferenceMm: Int,
         useMph: Boolean
     ): TelemetryData {
-        val voltageRaw = rawParams[0xE2] ?: 0
-        val voltage = voltageRaw / 10.0f
+        // ---- AddrE2 block (flags / speed / gear) ----
+        // 0xE2 = error/status flags (NOT voltage)
+        val errorFlags = rawParams[0xE2] ?: 0
 
-        val lineCurrentRaw = rawParams[0xE3] ?: 0
-        val lineCurrent = lineCurrentRaw.toShort() / 10.0f
-
+        // MeasureSpeed: raw = mechanical_RPM × 4 (fixed FarDriver protocol constant)
         val rpmRaw = rawParams[0xE5] ?: 0
-        // raw = mechanical_RPM × 4 → convert to mechanical RPM for display
         val mechanicalRpm = rpmRaw / 4
 
-        val gearRaw = rawParams[0xE6] ?: 0
-        val gear = gearRaw and 0xFF
+        val gear = (rawParams[0xE6] ?: 0) and 0xFF
 
-        val controllerTempRaw = rawParams[0xE8] ?: 0
+        // ---- AddrE8 block (voltage / temps / lineCurrent / SOC) ----
+        // Bug 1 fix: voltage at 0xE8 (deci_volts), NOT 0xE2
+        val voltageRaw = rawParams[0xE8] ?: 0
+        val voltage = voltageRaw / 10.0f
+
+        val controllerTempRaw = rawParams[0xE9] ?: 0
         val controllerTemp = (controllerTempRaw and 0xFF).toByte().toInt()
 
-        val motorTempRaw = rawParams[0xE9] ?: 0
+        // Bug 1 fix: lineCurrent at 0xEA (int16, ÷4), NOT 0xE3 (÷10)
+        val lineCurrentRaw = rawParams[0xEA] ?: 0
+        val lineCurrent = lineCurrentRaw.toShort() / 4.0f
+
+        val motorTempRaw = rawParams[0xEB] ?: 0
         val motorTemp = (motorTempRaw and 0xFF).toByte().toInt()
 
-        val socRaw = rawParams[0xEA] ?: 0
+        val socRaw = rawParams[0xEC] ?: 0
         val soc = socRaw and 0xFF
 
-        // Speed: raw / 4 = mechanical_RPM; wheel speed = mechanical_RPM × circumference
-        val speedKmh = mechanicalRpm * (wheelCircumferenceMm.toDouble() / 1000.0) * 60.0 / 1000.0
-        val speed = if (useMph) (speedKmh * 0.621371).toFloat() else speedKmh.toFloat()
+        // ---- AddrEE block (phase currents) ----
+        // Bug 2 fix: Phase A and Phase C currents from 0xF0/0xF1/0xF2
+        // Each is a 24-bit big-endian value; conversion: 1.953125 × sqrt(raw24) = amps RMS
+        val f0 = rawParams[0xF0] ?: 0
+        val f1 = rawParams[0xF1] ?: 0
+        val f2 = rawParams[0xF2] ?: 0
 
-        val gearName = when (gear) {
-            0 -> "N"
-            1 -> "L"
-            2 -> "M"
-            3 -> "H"
-            else -> "?"
-        }
+        // PhaseA: bytes 0-2 of AddrEE data; packed across f0 (hi,lo) and f1 lo-byte
+        val phaseARaw24 = ((f0 and 0xFF) shl 16) or ((f0 shr 8 and 0xFF) shl 8) or (f1 and 0xFF)
+        val aPhaseCurrent = if (phaseARaw24 > 0) (1.953125 * sqrt(phaseARaw24.toDouble())).toFloat() else 0f
+
+        // PhaseC: bytes 3-5 of AddrEE data; packed across f1 hi-byte and f2 (lo,hi)
+        val phaseCRaw24 = ((f1 shr 8 and 0xFF) shl 16) or ((f2 and 0xFF) shl 8) or (f2 shr 8 and 0xFF)
+        val cPhaseCurrent = if (phaseCRaw24 > 0) (1.953125 * sqrt(phaseCRaw24.toDouble())).toFloat() else 0f
+
+        // ---- Speed ----
+        // Bug 3 check: already ÷4 (not ÷polePairs); confirmed correct from previous session
+        val speedKmh = if (wheelCircumferenceMm > 0) {
+            mechanicalRpm * (wheelCircumferenceMm.toDouble() / 1000.0) * 60.0 / 1000.0
+        } else 0.0
+        val speed = if (useMph) (speedKmh * 0.621371).toFloat() else speedKmh.toFloat()
 
         return TelemetryData(
             voltage = voltage,
             lineCurrent = lineCurrent,
+            aPhaseCurrent = aPhaseCurrent,
+            cPhaseCurrent = cPhaseCurrent,
             rpm = mechanicalRpm,
-            gear = gearName,
+            speed = speed,
+            speedUnit = if (useMph) "mph" else "km/h",
             controllerTemp = controllerTemp,
             motorTemp = motorTemp,
             soc = soc,
-            speed = speed,
-            speedUnit = if (useMph) "mph" else "km/h"
+            gear = gear,
+            errorFlags = errorFlags
         )
     }
 }

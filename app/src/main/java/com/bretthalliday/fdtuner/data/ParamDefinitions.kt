@@ -614,7 +614,7 @@ object ParamDefinitions {
     // addr 0x91 lo=Ratio9000 (2250 RPM),    hi=RatioMax
 
     private val ratiosSpeedSection = listOf(
-        ParamDef(name = "Ratio @ 0 RPM",    addr = 0x88, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "RatioMin — standstill output %"),
+        ParamDef(name = "RatioMin",          addr = 0x88, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Floor output % applied below the first breakpoint (125 RPM)"),
         ParamDef(name = "Ratio @ 125 RPM",  addr = 0x88, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio500 ÷ 4 = 125 RPM"),
         ParamDef(name = "Ratio @ 250 RPM",  addr = 0x89, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio1000 ÷ 4 = 250 RPM"),
         ParamDef(name = "Ratio @ 375 RPM",  addr = 0x89, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio1500 ÷ 4 = 375 RPM"),
