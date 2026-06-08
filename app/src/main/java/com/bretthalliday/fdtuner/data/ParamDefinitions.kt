@@ -1247,6 +1247,17 @@ object ParamDefinitions {
         "ZeroBattCoeff"       to { p: ParamDef -> p.copy(name = "0 BattCoeff") },
         "FullBattCoeff"       to { p: ParamDef -> p.copy(name = "Full BattCoeff") },
         "BackPTime"           to { p: ParamDef -> p.copy(name = "BackP_Time") },
+        // --- section corrections to match the factory-app menu layout ---
+        "SpdPulseNum"     to { p: ParamDef -> p.copy(section = SECTION_DISPLAY) },
+        "TorqueCoeff"     to { p: ParamDef -> p.copy(section = SECTION_DISPLAY) },
+        "LearnThrottle"   to { p: ParamDef -> p.copy(section = SECTION_PRODUCT) },
+        "LearnVolHigh"    to { p: ParamDef -> p.copy(section = SECTION_PRODUCT) },
+        "StartIs"         to { p: ParamDef -> p.copy(section = SECTION_PRODUCT) },
+        "BlockTime"       to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
+        "ParkTime"        to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
+        "ReleaseToSeat"   to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
+        "ThrottleInsert"  to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
+        "ThrottleLost"    to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
         // --- add confirmed scales/units for newly-decoded fields here as the sniffer reveals them ---
     )
 
