@@ -2,34 +2,23 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/settingsScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark">
+    android:background="@color/bg_dark"
+    android:clipToPadding="false">
 
     <LinearLayout
+        android:id="@+id/settingsContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/screen_padding"
-        android:paddingBottom="80dp">
+        android:padding="@dimen/screen_padding">
 
-        <!-- Section header -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SPEED SETTINGS"
-            android:textColor="@color/pink_primary"
-            android:textSize="12sp"
-            android:letterSpacing="0.12"
-            android:layout_marginBottom="8dp" />
+        <!-- ====================== VEHICLE ====================== -->
+        <TextView style="@style/SettingsSectionHeader" android:text="VEHICLE" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            app:cardBackgroundColor="@color/bg_surface"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
+        <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -37,161 +26,95 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Speed units -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Speed Units"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="4dp" />
+                <TextView style="@style/SettingsLabel" android:text="Speed Units" />
 
                 <Spinner
                     android:id="@+id/spinnerSpeedUnits"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@color/bg_elevated"
-                    android:popupBackground="@color/bg_surface" />
-
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="@color/divider" android:layout_marginVertical="14dp" />
-
-                <!-- Pole pairs -->
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Motor Pole Pairs"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="2dp" />
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="20dp" />
+
+                <View style="@style/SettingsDivider" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="QS205 / QS273 = 23  ·  MAC motors = 8–16"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="6dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etPolePairs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:textColor="@color/text_primary" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="@color/divider" android:layout_marginVertical="14dp" />
-
-                <!-- Wheel circumference -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Wheel Circumference (mm)"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="2dp" />
+                    style="@style/SettingsLabel"
+                    android:layout_marginTop="16dp"
+                    android:text="Wheel Circumference" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Outer circumference of your drive wheel"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="6dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etWheelCircumference"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:textColor="@color/text_primary" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Presets row 1 — your bikes -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Quick presets:"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="6dp" />
+                    style="@style/SettingsHint"
+                    android:text="Used with motor RPM to calculate road speed. Tap a preset or enter your measured roll-out." />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="6dp">
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnPresetOnyxRcr"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
+                    <EditText
+                        android:id="@+id/etWheelCircumference"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Onyx RCR"
-                        android:textSize="11sp"
-                        android:layout_marginEnd="4dp" />
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_hint"
+                        android:textSize="16sp"
+                        android:hint="2070" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnPresetSuper73"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="36dp"
-                        android:layout_weight="1"
-                        android:text="Super73"
-                        android:textSize="11sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="mm"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:paddingStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- Presets row 2 — standard sizes -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPreset20inch"
                         style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
                         android:layout_weight="1"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="6dp"
                         android:text="20&quot;"
-                        android:textSize="12sp"
-                        android:layout_marginEnd="4dp" />
+                        android:textColor="@color/cyan_accent"
+                        android:textSize="13sp"
+                        app:strokeColor="@color/cyan_accent" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPreset24inch"
                         style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
                         android:layout_weight="1"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="6dp"
                         android:text="24&quot;"
-                        android:textSize="12sp"
-                        android:layout_marginEnd="4dp" />
+                        android:textColor="@color/cyan_accent"
+                        android:textSize="13sp"
+                        app:strokeColor="@color/cyan_accent" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnPreset26inch"
                         style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
-                        android:layout_height="36dp"
                         android:layout_weight="1"
+                        android:layout_height="40dp"
                         android:text="26&quot;"
-                        android:textSize="12sp" />
+                        android:textColor="@color/cyan_accent"
+                        android:textSize="13sp"
+                        app:strokeColor="@color/cyan_accent" />
 
                 </LinearLayout>
 
@@ -199,23 +122,10 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Feature 6: ALERTS section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ALERTS"
-            android:textColor="@color/pink_primary"
-            android:textSize="12sp"
-            android:letterSpacing="0.12"
-            android:layout_marginBottom="8dp" />
+        <!-- ====================== ALERTS ====================== -->
+        <TextView style="@style/SettingsSectionHeader" android:text="ALERTS" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            app:cardBackgroundColor="@color/bg_surface"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
+        <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -223,13 +133,11 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Alerts enabled toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="4dp">
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="0dp"
@@ -237,107 +145,93 @@
                         android:layout_weight="1"
                         android:text="Enable Alerts"
                         android:textColor="@color/text_primary"
-                        android:textSize="15sp" />
+                        android:textSize="16sp" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchAlertsEnabled"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true" />
+                        android:layout_height="wrap_content" />
 
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="@color/divider" android:layout_marginVertical="12dp" />
-
-                <!-- Motor temp threshold -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Motor Temp Warning (°C)"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="2dp" />
+                <View style="@style/SettingsDivider" android:layout_marginTop="16dp" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Alert when motor temperature exceeds this value"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="6dp" />
+                    style="@style/SettingsLabel"
+                    android:layout_marginTop="16dp"
+                    android:text="Motor Temp Warning" />
 
-                <com.google.android.material.textfield.TextInputLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="4dp">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <EditText
                         android:id="@+id/etAlertMotorTemp"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:inputType="number"
-                        android:hint="Default: 80"
-                        android:textColor="@color/text_primary" />
+                        android:maxLines="1"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_hint"
+                        android:textSize="16sp"
+                        android:hint="80" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="°C"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:paddingStart="8dp" />
 
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="@color/divider" android:layout_marginVertical="12dp" />
+                </LinearLayout>
 
-                <!-- Battery low voltage threshold -->
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Battery Low Warning (V)"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="2dp" />
+                    style="@style/SettingsLabel"
+                    android:layout_marginTop="16dp"
+                    android:text="Battery Low Warning" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Alert when battery voltage drops below this value"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:layout_marginBottom="6dp" />
-
-                <com.google.android.material.textfield.TextInputLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="4dp">
 
-                    <com.google.android.material.textfield.TextInputEditText
+                    <EditText
                         android:id="@+id/etAlertBattLow"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:inputType="numberDecimal"
-                        android:hint="Default: 60.0"
-                        android:textColor="@color/text_primary" />
+                        android:maxLines="1"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_hint"
+                        android:textSize="16sp"
+                        android:hint="60.0" />
 
-                </com.google.android.material.textfield.TextInputLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="V"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:paddingStart="8dp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Developer section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DEVELOPER"
-            android:textColor="@color/pink_primary"
-            android:textSize="12sp"
-            android:letterSpacing="0.12"
-            android:layout_marginBottom="8dp" />
+        <!-- ====================== DEVELOPER ====================== -->
+        <TextView style="@style/SettingsSectionHeader" android:text="DEVELOPER" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="@color/bg_surface"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
+        <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -345,13 +239,11 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Dev-mode toggle -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="4dp">
+                    android:gravity="center_vertical">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -364,15 +256,11 @@
                             android:layout_height="wrap_content"
                             android:text="Developer Mode"
                             android:textColor="@color/text_primary"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:textSize="16sp" />
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Enables raw packet sniffer"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
+                            style="@style/SettingsHint"
+                            android:text="Advanced read-only tools for decoding controller data." />
 
                     </LinearLayout>
 
@@ -383,49 +271,44 @@
 
                 </LinearLayout>
 
-                <!-- Sniffer launch button (visible only when dev mode is ON) -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnOpenSniffer"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
+                <LinearLayout
+                    android:id="@+id/groupDevTools"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
-                    android:text="🔍  Packet Sniffer"
-                    android:textColor="@color/cyan_accent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:visibility="gone"
-                    app:strokeColor="@color/cyan_accent" />
+                    android:layout_marginTop="12dp"
+                    android:paddingStart="8dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnOpenSniffer"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="🔍  Packet Sniffer"
+                        android:textColor="@color/cyan_accent"
+                        app:strokeColor="@color/cyan_accent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnOpenDiagnostics"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="8dp"
+                        android:text="🩺  Diagnostics (live state)"
+                        android:textColor="@color/cyan_accent"
+                        app:strokeColor="@color/cyan_accent" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Diagnostics — read-only live state/telemetry view -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenDiagnostics"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="16dp"
-            android:text="🩺  Diagnostics (live state)"
-            android:textColor="@color/cyan_accent"
-            app:strokeColor="@color/cyan_accent" />
+        <!-- ====================== ABOUT ====================== -->
+        <TextView style="@style/SettingsSectionHeader" android:text="ABOUT" />
 
-        <!-- About section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ABOUT"
-            android:textColor="@color/pink_primary"
-            android:textSize="12sp"
-            android:letterSpacing="0.12"
-            android:layout_marginBottom="8dp" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/bg_surface"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="2dp">
+        <com.google.android.material.card.MaterialCardView style="@style/SettingsCard">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -437,18 +320,64 @@
                     android:id="@+id/tvAppVersion"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
+                    android:text="FarDriver Whisperer"
+                    android:textColor="@color/pink_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvAppNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/about_body"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.3" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/about_safety_title"
+                    android:textColor="@color/warning_amber"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/about_safety"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
-                    android:lineSpacingMultiplier="1.5" />
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/about_credits_title"
+                    android:textColor="@color/cyan_accent"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/about_credits"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.3" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/about_built_by"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:textStyle="italic" />
 
             </LinearLayout>
 

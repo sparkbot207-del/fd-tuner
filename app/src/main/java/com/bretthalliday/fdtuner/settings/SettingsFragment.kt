@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -30,12 +32,15 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        applyBottomInsets()
+
         val prefs = requireContext().getSharedPreferences("fd_settings", Context.MODE_PRIVATE)
         val mgr = bleManager ?: return
 
         // ---- Load persisted values into BleManager on open ----
+        // NOTE: pole pairs is intentionally NOT loaded here — it is read live from the
+        // controller (PolePairs param, word 0x14) by FardriverBleManager.
         mgr.useMph = prefs.getBoolean("use_mph", true)
-        mgr.polePairs = prefs.getInt("pole_pairs", 23)
         mgr.wheelCircumferenceMm = prefs.getInt("wheel_circ_mm", 2100)
 
         // ---- Speed units spinner ----
@@ -53,17 +58,6 @@ class SettingsFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        // ---- Pole pairs ----
-        binding.etPolePairs.setText(mgr.polePairs.toString())
-        binding.etPolePairs.addTextChangedListener { text ->
-            text?.toString()?.toIntOrNull()?.let { v ->
-                if (v in 1..50) {
-                    mgr.polePairs = v
-                    prefs.edit().putInt("pole_pairs", v).apply()
-                }
-            }
-        }
-
         // ---- Wheel circumference ----
         binding.etWheelCircumference.setText(mgr.wheelCircumferenceMm.toString())
         binding.etWheelCircumference.addTextChangedListener { text ->
@@ -76,21 +70,13 @@ class SettingsFragment : Fragment() {
         }
 
         // ---- Wheel circumference presets ----
-        val presets = mapOf(
-            binding.btnPresetOnyxRcr    to Pair("Onyx RCR (17\")",    2150),
-            binding.btnPresetSuper73    to Pair("Super73 (20\")",      1994),
-            binding.btnPreset20inch     to Pair("20\" standard",       1994),
-            binding.btnPreset24inch     to Pair("24\" standard",       1899),
-            binding.btnPreset26inch     to Pair("26\" standard",       2073),
-        )
-        presets.forEach { (btn, pair) ->
-            val (_, mm) = pair
-            btn.setOnClickListener {
-                binding.etWheelCircumference.setText(mm.toString())
-            }
-        }
+        // Grounded standard roll-out values (cycle-computer charts). Brand-specific fat-tire
+        // presets were removed because their circumference could not be reliably confirmed.
+        binding.btnPreset20inch.setOnClickListener { binding.etWheelCircumference.setText("1590") }
+        binding.btnPreset24inch.setOnClickListener { binding.etWheelCircumference.setText("1900") }
+        binding.btnPreset26inch.setOnClickListener { binding.etWheelCircumference.setText("2070") }
 
-        // ---- Feature 6: Alert settings ----
+        // ---- Alert settings ----
         binding.switchAlertsEnabled.isChecked = prefs.getBoolean("alerts_enabled", true)
         binding.switchAlertsEnabled.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("alerts_enabled", isChecked).apply()
@@ -112,33 +98,43 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        // ---- Developer mode ----
+        // ---- Developer mode (gates the dev tools sub-group) ----
         val devMode = prefs.getBoolean("dev_mode", false)
         binding.switchDevMode.isChecked = devMode
-        binding.btnOpenSniffer.visibility = if (devMode) View.VISIBLE else View.GONE
-
+        binding.groupDevTools.visibility = if (devMode) View.VISIBLE else View.GONE
         binding.switchDevMode.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("dev_mode", isChecked).apply()
-            binding.btnOpenSniffer.visibility = if (isChecked) View.VISIBLE else View.GONE
+            binding.groupDevTools.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
-
         binding.btnOpenSniffer.setOnClickListener {
             findNavController().navigate(R.id.action_settings_to_sniffer)
         }
-
         binding.btnOpenDiagnostics.setOnClickListener {
             findNavController().navigate(R.id.action_settings_to_diagnostics)
         }
 
-        // ---- About ----
-        binding.tvAppVersion.text = "Fardriver Whisperer v${BuildConfig.VERSION_NAME}"
-        binding.tvAppNotes.text =
-            "Wheel circumference is used to calculate speed from RPM.\n" +
-            "Pole pairs must match your motor for accurate speed readings.\n\n" +
-            "QS205 = 23 pole pairs\n" +
-            "QS273 = 23 pole pairs\n" +
-            "MAC motor = typically 8–16 pole pairs\n\n" +
-            "Settings are saved automatically."
+        // ---- About (version is dynamic; the body copy lives in string resources) ----
+        binding.tvAppVersion.text = "FarDriver Whisperer v${BuildConfig.VERSION_NAME}"
+    }
+
+    /**
+     * Add the bottom window inset (navigation bar + IME) to the scroll content's bottom padding
+     * so the last card always clears the system bars / bottom nav, instead of a hardcoded value.
+     */
+    private fun applyBottomInsets() {
+        val content = binding.settingsContent
+        val baseL = content.paddingLeft
+        val baseT = content.paddingTop
+        val baseR = content.paddingRight
+        val baseB = content.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(content) { v, insets ->
+            val sys = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime()
+            )
+            v.setPadding(baseL, baseT, baseR, baseB + sys.bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(content)
     }
 
     override fun onDestroyView() {

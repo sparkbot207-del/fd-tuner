@@ -87,9 +87,32 @@ class FardriverBleManager(private val context: Context) {
 
     // ---- Settings (written by SettingsFragment) ----
 
-    var polePairs: Int = 4
     var wheelCircumferenceMm: Int = 2100
     var useMph: Boolean = true
+
+    // Pole pairs is a CONTROLLER parameter (PolePairs, word 0x14 low byte), not a user setting.
+    // We read it live so a hand-typed value can never silently disagree with what the controller
+    // is actually running. The last-known value is persisted as a fallback for the window before
+    // the parameter has been read on a fresh connect. Never hardcoded.
+    private val POLE_PAIRS_ADDR = 0x14
+    private var cachedPolePairs: Int =
+        context.getSharedPreferences("fd_settings", Context.MODE_PRIVATE)
+            .getInt("pole_pairs_cached", 0)
+
+    /** Live pole pairs from the controller, else last-known persisted value, else 0 (unknown). */
+    val polePairs: Int
+        get() {
+            val live = (_rawParams.value[POLE_PAIRS_ADDR] ?: 0) and 0xFF
+            if (live in 1..63) {
+                if (live != cachedPolePairs) {
+                    cachedPolePairs = live
+                    context.getSharedPreferences("fd_settings", Context.MODE_PRIVATE)
+                        .edit().putInt("pole_pairs_cached", live).apply()
+                }
+                return live
+            }
+            return cachedPolePairs
+        }
 
     // ---- Internal state ----
 
