@@ -1225,7 +1225,26 @@ object ParamDefinitions {
         "MotorTempRestore"  to { p: ParamDef -> p.copy(unit = "\u00B0C") },
         "MosTempRestore"    to { p: ParamDef -> p.copy(unit = "\u00B0C") },
         // --- section placement requested by the user ---
-        "ReCurrRatio"       to { p: ParamDef -> p.copy(section = SECTION_PRODUCT) }
+        "ReCurrRatio"       to { p: ParamDef -> p.copy(section = SECTION_PRODUCT) },
+        // --- official factory-app display names (source: docs/fardriver_menu_map.md, H/M rows) ---
+        "ThrottleLow"         to { p: ParamDef -> p.copy(name = "Throttle Low") },
+        "ThrottleHigh"        to { p: ParamDef -> p.copy(name = "Throttle High") },
+        "MidSpeed"            to { p: ParamDef -> p.copy(name = "MiddleSpeed") },
+        "BattRatedCap"        to { p: ParamDef -> p.copy(name = "Batt RatedCapacity") },
+        "BstTime"             to { p: ParamDef -> p.copy(name = "BoostTime") },
+        "BstRelease"          to { p: ParamDef -> p.copy(name = "BoostRelease") },
+        "PC13Config"          to { p: ParamDef -> p.copy(name = "PC13") },
+        "SpeedPulse"          to { p: ParamDef -> p.copy(name = "Speed Pulses") },
+        "SpeedMeterConfig1"   to { p: ParamDef -> p.copy(name = "SpeedoMeter") },
+        "CANConfig"           to { p: ParamDef -> p.copy(name = "CAN") },
+        "SpeedMeterConfig2"   to { p: ParamDef -> p.copy(name = "Step") },
+        "SpecialCode"         to { p: ParamDef -> p.copy(name = "SpecialFrame") },
+        "WheelRadius"         to { p: ParamDef -> p.copy(name = "WheelR") },
+        "HighVolProtect"      to { p: ParamDef -> p.copy(name = "HigiVolProtect") },
+        "HighVolRestore"      to { p: ParamDef -> p.copy(name = "HigiVolRestore") },
+        "ZeroBattCoeff"       to { p: ParamDef -> p.copy(name = "0 BattCoeff") },
+        "FullBattCoeff"       to { p: ParamDef -> p.copy(name = "Full BattCoeff") },
+        "BackPTime"           to { p: ParamDef -> p.copy(name = "BackP_Time") },
         // --- add confirmed scales/units for newly-decoded fields here as the sniffer reveals them ---
     )
 
