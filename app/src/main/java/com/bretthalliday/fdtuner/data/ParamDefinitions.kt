@@ -1280,7 +1280,7 @@ object ParamDefinitions {
         val curatedReal = curatedParams.filter { it.addr != null }
         val coveredKeys = curatedReal.map { physicalKey(it) }.toSet()
         val generatedExtra = GeneratedParamDefs.all.filter { physicalKey(it) !in coveredKeys }
-        (curatedReal + generatedExtra)
+        val mapped = (curatedReal + generatedExtra)
             // Guard: collapse any residual physical-location duplicates so no field appears
             // twice. Curated entries are listed first so curated wins over generated, and the
             // first-listed section wins among curated-internal dupes. (A handful of curated
@@ -1291,6 +1291,21 @@ object ParamDefinitions {
             // name. Enrichment only touches notes/min/max — never name/unit/section — so the
             // OVERRIDES above still win for the fields they set.
             .map { def -> enrichFromDocs(def) }
+
+        // Unmapped curated placeholders (addr == null, no confirmed register yet). Keep them
+        // VISIBLE so they can be located with the sniffer / Guided Capture — but only where no
+        // real field already covers the same name (so nothing is duplicated). They are never
+        // writable (addr == null => isWritable == false). Deduped by name because addr-null
+        // entries all share the same physical key.
+        val presentNames = mapped.map { normName(it.name) }.toSet()
+        val placeholders = curatedParams
+            .filter { it.addr == null }
+            .map { def -> OVERRIDES[def.name]?.invoke(def) ?: def }
+            .map { def -> enrichFromDocs(def) }
+            .filter { normName(it.name) !in presentNames }
+            .distinctBy { normName(it.name) }
+
+        mapped + placeholders
     }
 
     /**

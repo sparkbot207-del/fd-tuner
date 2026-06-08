@@ -121,7 +121,7 @@ class ParamsSectionFragment : Fragment() {
             p.addr?.let { addr ->
                 rawMap[addr]?.let { raw -> p.formatDisplay(raw) }
                     ?: if (rawMap.isEmpty()) "Connect to read" else "—"
-            } ?: "Addr unknown"
+            } ?: "Unmapped"
         }
 
         val note = if (isDerivedKp) "Read-only · KP = KI × ${PidTuning.KP_KI_RATIO}" else p.notes
