@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bretthalliday.fdtuner.databinding.DialogParamEditBinding
 import com.bretthalliday.fdtuner.model.ParamDef
+import com.bretthalliday.fdtuner.model.ParamDocs
 
 /**
  * Dialog for editing a single parameter value.
@@ -34,7 +35,26 @@ object ParamEditDialog {
         // Populate header
         binding.tvDialogParamName.text = param.name
         binding.tvDialogUnit.text = param.unit
-        binding.tvDialogNotes.text = param.notes.ifEmpty { "—" }
+
+        // Rich factory-app docs (keyed by official name); fall back to plain notes.
+        val doc = ParamDocs.byName[param.name]
+        binding.tvDialogNotes.text =
+            doc?.help?.takeIf { it.isNotBlank() } ?: param.notes.ifEmpty { "—" }
+
+        val rec = doc?.recommendation?.takeIf { it.isNotBlank() }
+        binding.tvDialogRecommend.visibility =
+            if (rec != null) android.view.View.VISIBLE else android.view.View.GONE
+        if (rec != null) binding.tvDialogRecommend.text = "Recommended: $rec"
+
+        val ex = doc?.examples?.takeIf { it.isNotBlank() }
+        binding.tvDialogExamples.visibility =
+            if (ex != null) android.view.View.VISIBLE else android.view.View.GONE
+        if (ex != null) binding.tvDialogExamples.text = "Examples: $ex"
+
+        val warn = doc?.warning?.takeIf { it.isNotBlank() }
+        binding.layoutDocWarning.visibility =
+            if (warn != null) android.view.View.VISIBLE else android.view.View.GONE
+        if (warn != null) binding.tvDocWarning.text = warn
 
         // Show current value
         val currentDisplay = if (currentRaw != null) {

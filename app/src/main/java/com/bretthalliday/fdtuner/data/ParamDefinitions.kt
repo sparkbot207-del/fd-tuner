@@ -2,6 +2,7 @@ package com.bretthalliday.fdtuner.data
 
 import com.bretthalliday.fdtuner.model.ParamDef
 import com.bretthalliday.fdtuner.model.GeneratedParamDefs
+import com.bretthalliday.fdtuner.model.ParamDocs
 
 /**
  * Complete parameter definitions for all 10 sections.
@@ -1270,6 +1271,34 @@ object ParamDefinitions {
             // entries map two names to the same word — see commit notes.)
             .distinctBy { physicalKey(it) }
             .map { def -> OVERRIDES[def.name]?.invoke(def) ?: def }
+            // Enrich from the factory-app docs LAST so lookup uses the official (post-OVERRIDES)
+            // name. Enrichment only touches notes/min/max — never name/unit/section — so the
+            // OVERRIDES above still win for the fields they set.
+            .map { def -> enrichFromDocs(def) }
+    }
+
+    /**
+     * Enrich a param from the factory-app docs (ParamDocs.byName), keyed by the official name.
+     * notes = help (+ "Recommended: ..."). Doc min/max are applied ONLY when the curated def
+     * left the defaults (0 / 9999), so deliberate safety bounds are never overwritten. The
+     * richer fields (examples, warning, recommendation) are read live by the edit dialog.
+     */
+    private fun enrichFromDocs(def: ParamDef): ParamDef {
+        val doc = ParamDocs.byName[def.name] ?: return def
+        val composed = buildString {
+            if (doc.help.isNotBlank()) append(doc.help)
+            if (doc.recommendation.isNotBlank()) {
+                if (isNotEmpty()) append("\n")
+                append("Recommended: ").append(doc.recommendation)
+            }
+        }
+        val notes = if (composed.isNotBlank()) composed else def.notes
+        val canSetBounds = def.minVal == 0 && def.maxVal == 9999 && doc.minVal != null && doc.maxVal != null
+        return def.copy(
+            notes = notes,
+            minVal = if (canSetBounds) (doc.minVal ?: def.minVal) else def.minVal,
+            maxVal = if (canSetBounds) (doc.maxVal ?: def.maxVal) else def.maxVal
+        )
     }
 
     // ---- Public accessors (now backed by the complete generated set) ----
