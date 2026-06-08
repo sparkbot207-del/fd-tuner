@@ -34,7 +34,8 @@ data class ParamDef(
     val isReadOnly: Boolean = false
 ) {
     /** True if this param can be written to the controller */
-    val isWritable: Boolean get() = addr != null
+    /** True if this param can be written to the controller (has an address AND is not read-only telemetry) */
+    val isWritable: Boolean get() = addr != null && !isReadOnly
 
     /** Extract the display value from a raw word read from the controller */
     fun extractValue(rawWord: Int): Int {

@@ -921,6 +921,35 @@ object ParamDefinitions {
             maxVal = 9999,
             notes = "HPP AddrD0 word 0xD4. Speed display ratio (SpeedRatio)."
         ),
+        // ---- Live read-only telemetry (isReadOnly=true — value shown, write disabled) ----
+        ParamDef(
+            name = "ThrottleVoltage",
+            addr = 0x82,
+            section = SECTION_DISPLAY,
+            scale = 100f,
+            unit = "V",
+            isReadOnly = true,
+            notes = "HPP Addr82 word 0x82, ×0.01. Live throttle position — read only."
+        ),
+        ParamDef(
+            name = "AVGPower",
+            addr = 0xD1,
+            section = SECTION_DISPLAY,
+            isHiByte = true,
+            scale = 0.25f,
+            unit = "Wh/km",
+            isReadOnly = true,
+            notes = "HPP AddrD0 byte3 (hi of 0xD1), ×4. Average power — read only."
+        ),
+        ParamDef(
+            name = "AVGSpeed",
+            addr = 0xD3,
+            section = SECTION_DISPLAY,
+            isLoByte = true,
+            unit = "km/h",
+            isReadOnly = true,
+            notes = "HPP AddrD0 byte8 (lo of 0xD3). Average speed — read only."
+        ),
         ParamDef(name = "GearRatio", addr = null, section = SECTION_DISPLAY, notes = "Gear display ratio — addr TBD"),
         ParamDef(name = "Step", addr = null, section = SECTION_DISPLAY, notes = "Step size — addr TBD"),
         ParamDef(name = "SpecialFrame", addr = null, section = SECTION_DISPLAY, notes = "Special frame mode — addr TBD"),
