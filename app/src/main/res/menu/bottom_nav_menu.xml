@@ -12,11 +12,6 @@
         android:title="@string/nav_params" />
 
     <item
-        android:id="@+id/settingsFragment"
-        android:icon="@drawable/ic_settings"
-        android:title="@string/nav_settings" />
-
-    <item
         android:id="@+id/profilesFragment"
         android:icon="@drawable/ic_profile"
         android:title="Profiles" />
@@ -25,5 +20,10 @@
         android:id="@+id/errorCodesFragment"
         android:icon="@drawable/ic_error"
         android:title="Errors" />
+
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/nav_settings" />
 
 </menu>
