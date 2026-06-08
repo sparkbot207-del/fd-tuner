@@ -22,7 +22,11 @@ object ParamEditDialog {
         fragment: Fragment,
         param: ParamDef,
         currentRaw: Int?,
-        onConfirm: (Int) -> Unit
+        onConfirm: (Int) -> Unit,
+        /** Extra warning shown prominently when the param itself has no doc warning. */
+        extraWarning: String? = null,
+        /** Optional line appended to the confirm dialog (e.g. a derived paired change). */
+        derivedConfirmLine: ((newValue: Int) -> String)? = null
     ) {
         val context = fragment.requireContext()
         val binding = DialogParamEditBinding.inflate(LayoutInflater.from(context))
@@ -51,7 +55,7 @@ object ParamEditDialog {
             if (ex != null) android.view.View.VISIBLE else android.view.View.GONE
         if (ex != null) binding.tvDialogExamples.text = "Examples: $ex"
 
-        val warn = doc?.warning?.takeIf { it.isNotBlank() }
+        val warn = doc?.warning?.takeIf { it.isNotBlank() } ?: extraWarning
         binding.layoutDocWarning.visibility =
             if (warn != null) android.view.View.VISIBLE else android.view.View.GONE
         if (warn != null) binding.tvDocWarning.text = warn
@@ -136,13 +140,16 @@ object ParamEditDialog {
                     else -> "Apply this value?"
                 }
 
+                val derivedLine = derivedConfirmLine?.invoke(rawInt)
+
                 androidx.appcompat.app.AlertDialog.Builder(context)
                     .setTitle("Confirm Write")
                     .setMessage(
                         "${param.name}\n\n" +
                         "Current: $currentDisplay ${param.unit}\n" +
-                        "New:     $newDisplayStr ${param.unit}\n\n" +
-                        warningLine
+                        "New:     $newDisplayStr ${param.unit}\n" +
+                        (if (derivedLine != null) "$derivedLine\n" else "") +
+                        "\n" + warningLine
                     )
                     .setPositiveButton("Apply") { _, _ ->
                         onConfirm(rawInt)

@@ -1,11 +1,14 @@
 package com.bretthalliday.fdtuner.ui.params
 
 import android.app.AlertDialog
+import android.graphics.Typeface
 import android.os.Bundle
-import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ScrollView
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -15,12 +18,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bretthalliday.fdtuner.R
 import com.bretthalliday.fdtuner.data.ParamDefinitions
 import com.bretthalliday.fdtuner.databinding.FragmentParamsSectionBinding
 import com.bretthalliday.fdtuner.databinding.ItemParamBinding
 import com.bretthalliday.fdtuner.model.ParamDef
-import com.bretthalliday.fdtuner.model.ParamDocs
-import com.bretthalliday.fdtuner.model.PidPreset
+import com.bretthalliday.fdtuner.model.PidTuning
 import kotlinx.coroutines.launch
 
 class ParamsSectionFragment : Fragment() {
@@ -33,6 +36,8 @@ class ParamsSectionFragment : Fragment() {
 
     private val sectionName: String
         get() = arguments?.getString("section") ?: ParamDefinitions.SECTION_PARAMETERS
+
+    private val isPidSection: Boolean get() = sectionName == ParamDefinitions.SECTION_PID
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,28 +53,15 @@ class ParamsSectionFragment : Fragment() {
 
         binding.tvSectionTitle.text = sectionName
 
-        // Show PID warning banner only on the PID section
-        binding.layoutPidWarning.visibility =
-            if (sectionName == ParamDefinitions.SECTION_PID) View.VISIBLE else View.GONE
-
-        // Tune Presets entry — PID section only
-        if (sectionName == ParamDefinitions.SECTION_PID) {
+        // PID warning banner + read-only factory reference, PID section only
+        binding.layoutPidWarning.visibility = if (isPidSection) View.VISIBLE else View.GONE
+        if (isPidSection) {
             binding.btnTunePresets.visibility = View.VISIBLE
-            binding.btnTunePresets.setOnClickListener { showPidPresetPicker() }
+            binding.btnTunePresets.text = "📋  Factory PID Table"
+            binding.btnTunePresets.setOnClickListener { showPidReference() }
         }
 
-        paramAdapter = ParamAdapter { param ->
-            if (param.isWritable) {
-                ParamEditDialog.show(
-                    fragment = this,
-                    param = param,
-                    currentRaw = viewModel.getRawWord(param),
-                    onConfirm = { newDisplayVal ->
-                        viewModel.writeParam(param, newDisplayVal)
-                    }
-                )
-            }
-        }
+        paramAdapter = ParamAdapter { param -> onParamTapped(param) }
 
         binding.recyclerParams.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -81,72 +73,109 @@ class ParamsSectionFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.rawParams.collect { rawMap ->
-                    val items = params.map { p ->
-                        ParamDisplay(
-                            param = p,
-                            displayValue = p.addr?.let { addr ->
-                                rawMap[addr]?.let { raw -> p.formatDisplay(raw) }
-                                    ?: if (rawMap.isEmpty()) "Connect to read" else "—"
-                            } ?: "Addr unknown"
-                        )
-                    }
+                    val items = params.map { p -> buildDisplay(p, params, rawMap) }
                     paramAdapter.submitList(items)
                 }
             }
         }
     }
 
-    // ---- PID tune presets ----
+    /** Build a display row, deriving KP values (KP = KI × ratio) and read-only state. */
+    private fun buildDisplay(
+        p: ParamDef,
+        sectionParams: List<ParamDef>,
+        rawMap: Map<Int, Int>
+    ): ParamDisplay {
+        val isDerivedKp = isPidSection && p.name in PidTuning.KP_NAMES
+        val display: String = if (isDerivedKp) {
+            // KP is derived from its paired KI; not read from the controller directly.
+            val kiName = PidTuning.KI_FOR_KP[p.name]
+            val kiDef = sectionParams.firstOrNull { it.name == kiName }
+            val kiRaw = kiDef?.addr?.let { rawMap[it] }
+            when {
+                kiDef != null && kiRaw != null -> (kiDef.extractValue(kiRaw) * PidTuning.KP_KI_RATIO).toString()
+                rawMap.isEmpty() -> "Connect to read"
+                else -> "—"
+            }
+        } else {
+            p.addr?.let { addr ->
+                rawMap[addr]?.let { raw -> p.formatDisplay(raw) }
+                    ?: if (rawMap.isEmpty()) "Connect to read" else "—"
+            } ?: "Addr unknown"
+        }
 
-    private fun showPidPresetPicker() {
-        val presets = ParamDocs.pidPresets
-        val labels = presets.map { p ->
-            "${p.name}\n   KI ${p.startKI}/${p.midKI}/${p.maxKI}   KP ${p.startKP}/${p.midKP}/${p.maxKP}"
-        }.toTypedArray()
-        AlertDialog.Builder(requireContext())
-            .setTitle("PID Tune Presets")
-            .setItems(labels) { _, which -> confirmAndWritePreset(presets[which]) }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val note = if (isDerivedKp) "Read-only · KP = KI × ${PidTuning.KP_KI_RATIO}" else p.notes
+        val editable = !isDerivedKp && p.isWritable
+        return ParamDisplay(p, display, editable, note)
     }
 
-    /** Stage the six values for review, list old -> new, then write via the confirmed path. */
-    private fun confirmAndWritePreset(preset: PidPreset) {
-        val mapping = listOf(
-            "StartKI" to preset.startKI, "MidKI" to preset.midKI, "MaxKI" to preset.maxKI,
-            "StartKP" to preset.startKP, "MidKP" to preset.midKP, "MaxKP" to preset.maxKP
-        )
-        val items = mapping.mapNotNull { (nm, v) -> viewModel.pidParamByName(nm)?.let { it to v } }
-        if (items.isEmpty()) {
-            Toast.makeText(requireContext(), "PID parameters not found", Toast.LENGTH_SHORT).show()
+    /** Handle a tap on a param row. KP rows are read-only; KI rows also write the derived KP. */
+    private fun onParamTapped(param: ParamDef) {
+        // Derived KP — never independently editable.
+        if (isPidSection && param.name in PidTuning.KP_NAMES) return
+
+        val isPidKi = isPidSection && param.name in PidTuning.KI_NAMES
+        if (isPidKi) {
+            val kpName = PidTuning.KP_FOR_KI[param.name]
+            val kpParam = kpName?.let { viewModel.pidParamByName(it) }
+            ParamEditDialog.show(
+                fragment = this,
+                param = param,
+                currentRaw = viewModel.getRawWord(param),
+                onConfirm = { newKi ->
+                    // Write KI, then the derived paired KP, via the existing confirmed path.
+                    viewModel.writeParam(param, newKi)
+                    if (kpParam != null) viewModel.writeParam(kpParam, newKi * PidTuning.KP_KI_RATIO)
+                },
+                extraWarning = PidTuning.WARNING,
+                derivedConfirmLine = { newKi ->
+                    val newKp = newKi * PidTuning.KP_KI_RATIO
+                    val curKp = kpParam?.let { kp -> viewModel.getRawWord(kp)?.let { kp.extractValue(it) } }
+                    "Also sets ${kpName}: ${curKp ?: "—"} → $newKp  (KP = KI × ${PidTuning.KP_KI_RATIO})"
+                }
+            )
             return
         }
-        val changes = items.joinToString("\n") { (param, newVal) ->
-            val cur = viewModel.getRawWord(param)?.let { param.extractValue(it).toString() } ?: "—"
-            "${param.name}:  $cur → $newVal"
+
+        if (param.isWritable) {
+            ParamEditDialog.show(
+                fragment = this,
+                param = param,
+                currentRaw = viewModel.getRawWord(param),
+                onConfirm = { newDisplayVal -> viewModel.writeParam(param, newDisplayVal) }
+            )
         }
-        val demoNote = if (viewModel.isDemo) "\n\n(Demo mode — values update locally only.)" else ""
+    }
+
+    /** Read-only factory PID reference ladder + warning. No apply, no staging, no write. */
+    private fun showPidReference() {
+        val header = String.format("%-3s %-12s %-13s %s", "Set", "KI S/M/Max", "KP S/M/Max", "Label")
+        val divider = "-".repeat(46)
+        val rows = PidTuning.REFERENCE.joinToString("\n") { r ->
+            String.format(
+                "%-3d %-12s %-13s %s",
+                r.set,
+                "${r.startKI}/${r.midKI}/${r.maxKI}",
+                "${r.startKP}/${r.midKP}/${r.maxKP}",
+                r.label
+            )
+        }
+        val table = "$header\n$divider\n$rows"
+        val message = "⚠️ ${PidTuning.WARNING}\n\n$divider\n$table"
+
+        val tv = TextView(requireContext()).apply {
+            typeface = Typeface.MONOSPACE
+            textSize = 12f
+            setTextColor(ContextCompat.getColor(requireContext(), R.color.text_primary))
+            setPadding(48, 32, 48, 24)
+            text = message
+        }
+        val scroll = ScrollView(requireContext()).apply { addView(tv) }
+
         AlertDialog.Builder(requireContext())
-            .setTitle("Apply \"${preset.name}\"?")
-            .setMessage("This writes ${items.size} PID values:\n\n$changes$demoNote")
-            .setPositiveButton("Write all") { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val res = viewModel.writePidPreset(items)
-                    val ok = res.notWritten.isEmpty()
-                    val msg = if (ok)
-                        "Wrote ${res.written.size} values: ${res.written.joinToString(", ")}"
-                    else
-                        "Wrote: ${res.written.joinToString(", ").ifEmpty { "none" }}\n\n" +
-                        "NOT written (write failed — BLE drop?): ${res.notWritten.joinToString(", ")}"
-                    if (!isAdded) return@launch
-                    AlertDialog.Builder(requireContext())
-                        .setTitle(if (ok) "PID preset applied" else "Partial write")
-                        .setMessage(msg)
-                        .setPositiveButton("OK", null)
-                        .show()
-                }
-            }
-            .setNegativeButton("Cancel", null)
+            .setTitle("Factory PID Reference (read-only)")
+            .setView(scroll)
+            .setPositiveButton("Close", null)
             .show()
     }
 
@@ -157,7 +186,9 @@ class ParamsSectionFragment : Fragment() {
 
     data class ParamDisplay(
         val param: ParamDef,
-        val displayValue: String
+        val displayValue: String,
+        val editable: Boolean,
+        val note: String
     )
 
     private class ParamAdapter(
@@ -169,13 +200,13 @@ class ParamsSectionFragment : Fragment() {
                 b.tvParamName.text = item.param.name
                 b.tvParamValue.text = item.displayValue
                 b.tvParamUnit.text = item.param.unit
-                b.tvParamNotes.text = item.param.notes.ifEmpty { null }
-                b.tvParamNotes.visibility = if (item.param.notes.isEmpty()) View.GONE else View.VISIBLE
+                b.tvParamNotes.text = item.note.ifEmpty { null }
+                b.tvParamNotes.visibility = if (item.note.isEmpty()) View.GONE else View.VISIBLE
 
-                b.root.isEnabled = item.param.isWritable
-                b.root.alpha = if (item.param.isWritable) 1.0f else 0.55f
+                b.root.isEnabled = item.editable
+                b.root.alpha = if (item.editable) 1.0f else 0.55f
                 b.root.setOnClickListener {
-                    if (item.param.isWritable) onClick(item.param)
+                    if (item.editable) onClick(item.param)
                 }
             }
         }

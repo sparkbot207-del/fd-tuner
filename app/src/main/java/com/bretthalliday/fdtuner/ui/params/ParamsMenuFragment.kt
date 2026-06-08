@@ -1,6 +1,7 @@
 package com.bretthalliday.fdtuner.ui.params
 
 import android.os.Bundle
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -28,6 +29,7 @@ import com.bretthalliday.fdtuner.databinding.FragmentParamsMenuBinding
 import com.bretthalliday.fdtuner.databinding.ItemParamBinding
 import com.bretthalliday.fdtuner.databinding.ItemParamsSectionBinding
 import com.bretthalliday.fdtuner.model.ParamDef
+import com.bretthalliday.fdtuner.model.PidTuning
 import kotlinx.coroutines.launch
 
 class ParamsMenuFragment : Fragment() {
@@ -86,13 +88,23 @@ class ParamsMenuFragment : Fragment() {
 
         // ---- Feature 5: search / filter ----
         searchAdapter = FlatParamAdapter { param ->
-            if (param.isWritable) {
-                ParamEditDialog.show(
-                    fragment = this,
-                    param = param,
-                    currentRaw = viewModel.getRawWord(param),
-                    onConfirm = { newDisplayVal -> viewModel.writeParam(param, newDisplayVal) }
-                )
+            when {
+                // Derived KP is never independently editable (KP = KI x ratio).
+                param.name in PidTuning.KP_NAMES -> {
+                    Toast.makeText(
+                        requireContext(),
+                        "${param.name} is derived from its KI (KP = KI x ${PidTuning.KP_KI_RATIO}). Edit the KI instead.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                param.isWritable -> {
+                    ParamEditDialog.show(
+                        fragment = this,
+                        param = param,
+                        currentRaw = viewModel.getRawWord(param),
+                        onConfirm = { newDisplayVal -> viewModel.writeParam(param, newDisplayVal) }
+                    )
+                }
             }
         }
         binding.recyclerSearchResults.apply {
