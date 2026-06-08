@@ -1258,6 +1258,10 @@ object ParamDefinitions {
         "ReleaseToSeat"   to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
         "ThrottleInsert"  to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
         "ThrottleLost"    to { p: ParamDef -> p.copy(section = SECTION_PROTECT) },
+        // --- approved section move: motor constants live under Ratios in Speed (factory app) ---
+        "LD"              to { p: ParamDef -> p.copy(section = SECTION_RATIOS_SPEED) },
+        "LQ"              to { p: ParamDef -> p.copy(section = SECTION_RATIOS_SPEED) },
+        "FAIF"            to { p: ParamDef -> p.copy(section = SECTION_RATIOS_SPEED) },
         // --- add confirmed scales/units for newly-decoded fields here as the sniffer reveals them ---
     )
 
@@ -1328,4 +1332,130 @@ object ParamDefinitions {
     /** Read-only live state/telemetry params for the Diagnostics screen (never writable). */
     val diagnosticsParams: List<ParamDef> =
         allParams.filter { it.isReadOnly || it.section == SECTION_DIAGNOSTICS }
+
+    // ---- Sub-group layout (display grouping only) ----
+
+    /** A rendered row in a section: a sub-heading or a param. */
+    sealed class SectionRow {
+        data class Header(val title: String) : SectionRow()
+        data class Item(val param: ParamDef) : SectionRow()
+    }
+
+    /** Normalize for tolerant name matching (ignore case, spaces, underscores). */
+    private fun normName(s: String) = s.lowercase().replace(" ", "").replace("_", "")
+
+    /**
+     * Per-section sub-group layout: section -> ordered (sub-heading, ordered param names).
+     * Names are matched tolerantly (case/space/underscore-insensitive) so earlier display
+     * renames still line up. A sub-group with an EMPTY name list is a catch-all that takes all
+     * not-yet-placed params in that section (used for FixedParas "Calibration"). Any param not
+     * placed by a group falls into a trailing "Other" group. Display only — no address/section
+     * changes here (the LD/LQ/FAIF section move is done in OVERRIDES).
+     */
+    val SECTION_LAYOUT: Map<String, List<Pair<String, List<String>>>> = mapOf(
+        SECTION_PARAMETERS to listOf(
+            "Motor Setup" to listOf("PolePairs", "PhaseOffset", "Motor Direction", "PhaseExchange", "TempSensor"),
+            "Ratings & Speed" to listOf("RatedVoltage", "RatedPower", "RatedSpeed", "MaxSpeed", "BackSpeed"),
+            "Current Limits" to listOf("MaxLineCurr", "MaxPhaseCurr", "BoostLineCurr", "BoostPhaseCurr"),
+            "Field Weakening" to listOf("WeakCharacter", "WeakResponse"),
+            "Throttle" to listOf("Throttle Low", "Throttle High", "ThrottleResponse")
+        ),
+        SECTION_RATIOS_SPEED to listOf(
+            "FW Curve" to listOf(
+                "RatioMin", "Ratio @ 125 RPM", "Ratio @ 250 RPM", "Ratio @ 375 RPM",
+                "Ratio @ 500 RPM", "Ratio @ 625 RPM", "Ratio @ 750 RPM", "Ratio @ 875 RPM",
+                "Ratio @ 1000 RPM", "Ratio @ 1125 RPM", "Ratio @ 1250 RPM", "Ratio @ 1375 RPM",
+                "Ratio @ 1500 RPM", "Ratio @ 1625 RPM", "Ratio @ 1750 RPM", "Ratio @ 1875 RPM",
+                "Ratio @ 2000 RPM", "Ratio @ 2125 RPM", "Ratio @ 2250 RPM", "RatioMax", "LimitSpeed"
+            ),
+            "Motor Constants" to listOf("LD", "LQ", "FAIF")
+        ),
+        SECTION_RATIOS_GEAR to listOf(
+            "Low Gear" to listOf("LowSpeedLineRatio", "LowSpeedPhaseRatio", "LowSpeed"),
+            "Mid Gear" to listOf("MidSpeedLineRatio", "MidSpeedPhaseRatio", "MiddleSpeed")
+        ),
+        SECTION_ENERGY_REGEN to listOf(
+            "Regen Settings" to listOf("StopBackCurr", "MaxBackCurr", "FreeThrottle", "Batt RatedCapacity"),
+            "Regen Curve" to (1..18).flatMap { listOf("Regen${it}_RPM", "Regen${it}_Pct") }
+        ),
+        SECTION_FUNCTIONS to listOf(
+            "Input Pins" to listOf(
+                "BoostPin", "CruisePin", "SideStandPin", "ForwardPin", "BackwardPin", "HighSpeedPin",
+                "LowSpeedPin", "ChargePin", "AntiTheftPin", "SeatPin", "SpeedLimitPin",
+                "SwitchVoltagePin", "PausePin", "RepairPin"
+            ),
+            "Behavior" to listOf(
+                "BoostTime", "BoostRelease", "HighLowSpeed", "EmptyRun", "GearConfig",
+                "Brake", "Park", "Follow", "Push"
+            )
+        ),
+        SECTION_DISPLAY to listOf(
+            "Speedometer" to listOf("Speed Pulses", "SpeedoMeter", "Pulse", "AVGSpeed"),
+            "CAN Bus" to listOf("CAN"),
+            "Wheel" to listOf("WheelR", "WheelWidth", "WheelRatio", "RateRatio", "GearRatio"),
+            "Coefficients" to listOf("ThrottleVoltage", "AVGPower", "Step", "SpecialFrame", "SQH")
+        ),
+        SECTION_PROTECT to listOf(
+            "Voltage" to listOf("HigiVolProtect", "HigiVolRestore", "LowVolProtect", "LowVolRestore"),
+            "Temperature" to listOf("MotorTempProtect", "MosTempProtect", "MotorTempRestore", "MosTempRestore"),
+            "Battery" to listOf("0 BattCoeff", "Full BattCoeff", "Batt RatedCapacity", "IntRes")
+        ),
+        SECTION_PID to listOf(
+            "PID Gains" to listOf("StartKI", "MidKI", "MaxKI", "StartKP", "MidKP", "MaxKP"),
+            "Speed Loop" to listOf("SpeedKI", "SpeedKP"),
+            "Tuning" to listOf("AN", "LM", "CurveTime", "MOE")
+        ),
+        SECTION_PRODUCT to listOf(
+            "Enables" to listOf(
+                "BCEnable", "SeatEnable", "PEnable", "AutoBackPEnable", "CruiseEnable",
+                "EABSEnable", "PushEnable", "BackEnable"
+            ),
+            "Ratios & Coefficients" to listOf("FwReRatio", "ReCurrRatio", "VolSelectRatio", "WeakCurrCoeff"),
+            "Misc" to listOf("OverSpeedAlarm", "RememberGear", "RelayDelay1S", "RelayOut", "AlarmDelay")
+        ),
+        SECTION_FIXED to listOf(
+            "Calibration" to emptyList()
+        )
+    )
+
+    /**
+     * Build the grouped, sub-headed rows for a section: walk its sub-groups in order, emitting a
+     * header then the matching params (in listed order), then a trailing "Other" group for
+     * anything unlisted so generated long-tail / unknown fields never disappear.
+     */
+    fun groupedSection(section: String): List<SectionRow> {
+        val params = forSection(section)
+        val byNorm = HashMap<String, ParamDef>()
+        for (p in params) byNorm.putIfAbsent(normName(p.name), p)
+
+        val rows = mutableListOf<SectionRow>()
+        val used = HashSet<String>()
+
+        SECTION_LAYOUT[section]?.forEach { (title, names) ->
+            val items = (if (names.isEmpty()) params.filter { it.name !in used }
+                         else names.mapNotNull { byNorm[normName(it)] })
+                .distinctBy { it.name }
+                .filter { it.name !in used }
+            items.forEach { used.add(it.name) }
+            if (items.isNotEmpty()) {
+                rows += SectionRow.Header(title)
+                items.forEach { rows += SectionRow.Item(it) }
+            }
+        }
+
+        val leftover = params.filter { it.name !in used }
+        if (leftover.isNotEmpty()) {
+            rows += SectionRow.Header("Other")
+            leftover.forEach { rows += SectionRow.Item(it) }
+        }
+        return rows
+    }
+
+    /** Layout names matching no real param in their section (typo detector; computed once). */
+    val layoutUnmatched: Map<String, List<String>> by lazy {
+        SECTION_LAYOUT.mapValues { (section, groups) ->
+            val present = forSection(section).map { normName(it.name) }.toSet()
+            groups.flatMap { it.second }.filter { normName(it) !in present }
+        }.filterValues { it.isNotEmpty() }
+    }
 }

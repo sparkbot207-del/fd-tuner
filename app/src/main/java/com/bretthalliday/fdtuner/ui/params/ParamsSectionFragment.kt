@@ -3,6 +3,7 @@ package com.bretthalliday.fdtuner.ui.params
 import android.app.AlertDialog
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +23,7 @@ import com.bretthalliday.fdtuner.R
 import com.bretthalliday.fdtuner.data.ParamDefinitions
 import com.bretthalliday.fdtuner.databinding.FragmentParamsSectionBinding
 import com.bretthalliday.fdtuner.databinding.ItemParamBinding
+import com.bretthalliday.fdtuner.databinding.ItemParamSubheaderBinding
 import com.bretthalliday.fdtuner.model.ParamDef
 import com.bretthalliday.fdtuner.model.PidTuning
 import kotlinx.coroutines.launch
@@ -32,7 +34,11 @@ class ParamsSectionFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: ParamsViewModel by activityViewModels()
-    private lateinit var paramAdapter: ParamAdapter
+    private lateinit var rowAdapter: RowAdapter
+
+    /** Grouped (sub-header + param) skeleton for this section, computed once. */
+    private lateinit var groupedRows: List<ParamDefinitions.SectionRow>
+    private lateinit var sectionParams: List<ParamDef>
 
     private val sectionName: String
         get() = arguments?.getString("section") ?: ParamDefinitions.SECTION_PARAMETERS
@@ -53,7 +59,6 @@ class ParamsSectionFragment : Fragment() {
 
         binding.tvSectionTitle.text = sectionName
 
-        // PID warning banner + read-only factory reference, PID section only
         binding.layoutPidWarning.visibility = if (isPidSection) View.VISIBLE else View.GONE
         if (isPidSection) {
             binding.btnTunePresets.visibility = View.VISIBLE
@@ -61,21 +66,37 @@ class ParamsSectionFragment : Fragment() {
             binding.btnTunePresets.setOnClickListener { showPidReference() }
         }
 
-        paramAdapter = ParamAdapter { param -> onParamTapped(param) }
+        groupedRows = ParamDefinitions.groupedSection(sectionName)
+        sectionParams = groupedRows.mapNotNull { (it as? ParamDefinitions.SectionRow.Item)?.param }
+        logLayoutMisses()
 
+        rowAdapter = RowAdapter { param -> onParamTapped(param) }
         binding.recyclerParams.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = paramAdapter
+            adapter = rowAdapter
         }
-
-        val params = viewModel.paramsForSection(sectionName)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.rawParams.collect { rawMap ->
-                    val items = params.map { p -> buildDisplay(p, params, rawMap) }
-                    paramAdapter.submitList(items)
+                    val rows = groupedRows.map { row ->
+                        when (row) {
+                            is ParamDefinitions.SectionRow.Header -> DisplayRow.Header(row.title)
+                            is ParamDefinitions.SectionRow.Item ->
+                                DisplayRow.Param(buildDisplay(row.param, sectionParams, rawMap))
+                        }
+                    }
+                    rowAdapter.submitList(rows)
                 }
+            }
+        }
+    }
+
+    /** Log any layout names that matched nothing — a quick typo detector during development. */
+    private fun logLayoutMisses() {
+        ParamDefinitions.layoutUnmatched[sectionName]?.let { misses ->
+            if (misses.isNotEmpty()) {
+                Log.d("ParamsLayout", "Section \"$sectionName\" — layout names with no matching param: $misses")
             }
         }
     }
@@ -88,7 +109,6 @@ class ParamsSectionFragment : Fragment() {
     ): ParamDisplay {
         val isDerivedKp = isPidSection && p.name in PidTuning.KP_NAMES
         val display: String = if (isDerivedKp) {
-            // KP is derived from its paired KI; not read from the controller directly.
             val kiName = PidTuning.KI_FOR_KP[p.name]
             val kiDef = sectionParams.firstOrNull { it.name == kiName }
             val kiRaw = kiDef?.addr?.let { rawMap[it] }
@@ -109,9 +129,7 @@ class ParamsSectionFragment : Fragment() {
         return ParamDisplay(p, display, editable, note)
     }
 
-    /** Handle a tap on a param row. KP rows are read-only; KI rows also write the derived KP. */
     private fun onParamTapped(param: ParamDef) {
-        // Derived KP — never independently editable.
         if (isPidSection && param.name in PidTuning.KP_NAMES) return
 
         val isPidKi = isPidSection && param.name in PidTuning.KI_NAMES
@@ -123,7 +141,6 @@ class ParamsSectionFragment : Fragment() {
                 param = param,
                 currentRaw = viewModel.getRawWord(param),
                 onConfirm = { newKi ->
-                    // Write KI, then the derived paired KP, via the existing confirmed path.
                     viewModel.writeParam(param, newKi)
                     if (kpParam != null) viewModel.writeParam(kpParam, newKi * PidTuning.KP_KI_RATIO)
                 },
@@ -191,11 +208,43 @@ class ParamsSectionFragment : Fragment() {
         val note: String
     )
 
-    private class ParamAdapter(
-        private val onClick: (ParamDef) -> Unit
-    ) : ListAdapter<ParamDisplay, ParamAdapter.VH>(DIFF) {
+    /** Rows can be a sub-heading or a param. */
+    sealed class DisplayRow {
+        data class Header(val title: String) : DisplayRow()
+        data class Param(val display: ParamDisplay) : DisplayRow()
+    }
 
-        inner class VH(private val b: ItemParamBinding) : RecyclerView.ViewHolder(b.root) {
+    private class RowAdapter(
+        private val onClick: (ParamDef) -> Unit
+    ) : ListAdapter<DisplayRow, RecyclerView.ViewHolder>(DIFF) {
+
+        override fun getItemViewType(position: Int): Int =
+            if (getItem(position) is DisplayRow.Header) TYPE_HEADER else TYPE_PARAM
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            val inflater = LayoutInflater.from(parent.context)
+            return if (viewType == TYPE_HEADER) {
+                HeaderVH(ItemParamSubheaderBinding.inflate(inflater, parent, false))
+            } else {
+                ParamVH(ItemParamBinding.inflate(inflater, parent, false), onClick)
+            }
+        }
+
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            when (val item = getItem(position)) {
+                is DisplayRow.Header -> (holder as HeaderVH).bind(item)
+                is DisplayRow.Param -> (holder as ParamVH).bind(item.display)
+            }
+        }
+
+        class HeaderVH(private val b: ItemParamSubheaderBinding) : RecyclerView.ViewHolder(b.root) {
+            fun bind(item: DisplayRow.Header) { b.tvSubHeader.text = item.title }
+        }
+
+        class ParamVH(
+            private val b: ItemParamBinding,
+            private val onClick: (ParamDef) -> Unit
+        ) : RecyclerView.ViewHolder(b.root) {
             fun bind(item: ParamDisplay) {
                 b.tvParamName.text = item.param.name
                 b.tvParamValue.text = item.displayValue
@@ -211,20 +260,19 @@ class ParamsSectionFragment : Fragment() {
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-            val b = ItemParamBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return VH(b)
-        }
-
-        override fun onBindViewHolder(holder: VH, position: Int) {
-            holder.bind(getItem(position))
-        }
-
         companion object {
-            val DIFF = object : DiffUtil.ItemCallback<ParamDisplay>() {
-                override fun areItemsTheSame(a: ParamDisplay, b: ParamDisplay) =
-                    a.param.name == b.param.name && a.param.section == b.param.section
-                override fun areContentsTheSame(a: ParamDisplay, b: ParamDisplay) = a == b
+            private const val TYPE_HEADER = 0
+            private const val TYPE_PARAM = 1
+
+            val DIFF = object : DiffUtil.ItemCallback<DisplayRow>() {
+                override fun areItemsTheSame(a: DisplayRow, b: DisplayRow): Boolean = when {
+                    a is DisplayRow.Header && b is DisplayRow.Header -> a.title == b.title
+                    a is DisplayRow.Param && b is DisplayRow.Param ->
+                        a.display.param.name == b.display.param.name &&
+                            a.display.param.section == b.display.param.section
+                    else -> false
+                }
+                override fun areContentsTheSame(a: DisplayRow, b: DisplayRow) = a == b
             }
         }
     }
