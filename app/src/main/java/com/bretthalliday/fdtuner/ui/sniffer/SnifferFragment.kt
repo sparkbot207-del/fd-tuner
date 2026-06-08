@@ -102,6 +102,10 @@ class SnifferFragment : Fragment() {
         }
 
         // Toolbar actions
+        binding.btnAnalyze.setOnClickListener {
+            findNavController().navigate(R.id.action_snifferFragment_to_analysisFragment)
+        }
+
         binding.btnExportCsv.setOnClickListener {
             val intent = viewModel.buildShareIntent(requireContext())
             startActivity(android.content.Intent.createChooser(intent, "Export sniffer CSV"))

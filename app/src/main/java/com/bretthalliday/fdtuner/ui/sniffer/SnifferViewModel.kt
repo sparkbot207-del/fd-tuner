@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bretthalliday.fdtuner.analysis.CaptureAnalyzer
 import com.bretthalliday.fdtuner.ble.FardriverBleManager
 import com.bretthalliday.fdtuner.ble.SniffPacket
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -97,6 +98,15 @@ class SnifferViewModel(private val bleManager: FardriverBleManager) : ViewModel(
         _latestByAddress.value = emptyMap()
         _packetCount.value = 0
     }
+
+    // ---- Analysis ----
+
+    /**
+     * Run [CaptureAnalyzer] on the current session snapshot.
+     * Caller is responsible for dispatching to a background thread (Dispatchers.Default).
+     */
+    fun runAnalysis(): CaptureAnalyzer.AnalysisResult =
+        CaptureAnalyzer.analyze(sessionLog.toList(), annotations.toList())
 
     // ---- CSV export ----
 

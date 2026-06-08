@@ -36,6 +36,15 @@
             android:textSize="12sp" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAnalyze"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Analyze"
+            android:textColor="@color/orange_primary"
+            android:textSize="12sp" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnExportCsv"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
