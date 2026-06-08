@@ -1,6 +1,8 @@
 package com.bretthalliday.fdtuner.ui.params
 
+import android.app.AlertDialog
 import android.os.Bundle
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,8 @@ import com.bretthalliday.fdtuner.data.ParamDefinitions
 import com.bretthalliday.fdtuner.databinding.FragmentParamsSectionBinding
 import com.bretthalliday.fdtuner.databinding.ItemParamBinding
 import com.bretthalliday.fdtuner.model.ParamDef
+import com.bretthalliday.fdtuner.model.ParamDocs
+import com.bretthalliday.fdtuner.model.PidPreset
 import kotlinx.coroutines.launch
 
 class ParamsSectionFragment : Fragment() {
@@ -47,6 +51,12 @@ class ParamsSectionFragment : Fragment() {
         // Show PID warning banner only on the PID section
         binding.layoutPidWarning.visibility =
             if (sectionName == ParamDefinitions.SECTION_PID) View.VISIBLE else View.GONE
+
+        // Tune Presets entry — PID section only
+        if (sectionName == ParamDefinitions.SECTION_PID) {
+            binding.btnTunePresets.visibility = View.VISIBLE
+            binding.btnTunePresets.setOnClickListener { showPidPresetPicker() }
+        }
 
         paramAdapter = ParamAdapter { param ->
             if (param.isWritable) {
@@ -84,6 +94,60 @@ class ParamsSectionFragment : Fragment() {
                 }
             }
         }
+    }
+
+    // ---- PID tune presets ----
+
+    private fun showPidPresetPicker() {
+        val presets = ParamDocs.pidPresets
+        val labels = presets.map { p ->
+            "${p.name}\n   KI ${p.startKI}/${p.midKI}/${p.maxKI}   KP ${p.startKP}/${p.midKP}/${p.maxKP}"
+        }.toTypedArray()
+        AlertDialog.Builder(requireContext())
+            .setTitle("PID Tune Presets")
+            .setItems(labels) { _, which -> confirmAndWritePreset(presets[which]) }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    /** Stage the six values for review, list old -> new, then write via the confirmed path. */
+    private fun confirmAndWritePreset(preset: PidPreset) {
+        val mapping = listOf(
+            "StartKI" to preset.startKI, "MidKI" to preset.midKI, "MaxKI" to preset.maxKI,
+            "StartKP" to preset.startKP, "MidKP" to preset.midKP, "MaxKP" to preset.maxKP
+        )
+        val items = mapping.mapNotNull { (nm, v) -> viewModel.pidParamByName(nm)?.let { it to v } }
+        if (items.isEmpty()) {
+            Toast.makeText(requireContext(), "PID parameters not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val changes = items.joinToString("\n") { (param, newVal) ->
+            val cur = viewModel.getRawWord(param)?.let { param.extractValue(it).toString() } ?: "—"
+            "${param.name}:  $cur → $newVal"
+        }
+        val demoNote = if (viewModel.isDemo) "\n\n(Demo mode — values update locally only.)" else ""
+        AlertDialog.Builder(requireContext())
+            .setTitle("Apply \"${preset.name}\"?")
+            .setMessage("This writes ${items.size} PID values:\n\n$changes$demoNote")
+            .setPositiveButton("Write all") { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val res = viewModel.writePidPreset(items)
+                    val ok = res.notWritten.isEmpty()
+                    val msg = if (ok)
+                        "Wrote ${res.written.size} values: ${res.written.joinToString(", ")}"
+                    else
+                        "Wrote: ${res.written.joinToString(", ").ifEmpty { "none" }}\n\n" +
+                        "NOT written (write failed — BLE drop?): ${res.notWritten.joinToString(", ")}"
+                    if (!isAdded) return@launch
+                    AlertDialog.Builder(requireContext())
+                        .setTitle(if (ok) "PID preset applied" else "Partial write")
+                        .setMessage(msg)
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun onDestroyView() {
