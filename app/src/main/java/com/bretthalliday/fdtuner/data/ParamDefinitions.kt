@@ -52,12 +52,13 @@ object ParamDefinitions {
             name = "Motor Direction",
             addr = 0x0B,
             section = SECTION_PARAMETERS,
+            isHiByte = true,       // HPP Addr06 byte11 = HI byte of word 0x0B
             unit = "",
             minVal = 0,
             maxVal = 1,
             bitMask = 0x01,
-            bitShift = 7,
-            notes = "bit7 of addr 0x0B; 0=Normal, 1=Reversed"
+            bitShift = 7,          // bit7 of hi byte
+            notes = "HPP Addr06 byte11 bit7 (HI byte of 0x0B). 0=Normal, 1=Reversed."
         ),
         ParamDef(
             name = "RatedVoltage",
@@ -154,12 +155,13 @@ object ParamDefinitions {
             name = "TempSensor",
             addr = 0x0B,
             section = SECTION_PARAMETERS,
+            isLoByte = true,       // HPP Addr06 byte10 = LO byte of word 0x0B
             unit = "",
             minVal = 0,
             maxVal = 7,
             bitMask = 0x07,
-            bitShift = 3,
-            notes = "0=None,1=PTC,2=NTC230K,3=KTY84,4=CACU,5=KTY83,6=NTC10K,7=NTC100K"
+            bitShift = 4,          // bits[4:6] of lo byte (was 3 — wrong)
+            notes = "HPP Addr06 byte10 bits4-6. 0=None,1=PTC,2=NTC230K,3=KTY84,4=CACU,5=KTY83,6=NTC10K,7=NTC100K"
         ),
         ParamDef(
             name = "PolePairs",
@@ -416,11 +418,13 @@ object ParamDefinitions {
         ),
         ParamDef(
             name = "HighVolRestore",
-            addr = null,
+            addr = 0x83,
             section = SECTION_PROTECT,
             scale = 10f,
             unit = "V",
-            notes = "≈ HighVolProtect + 2V (derived)"
+            minVal = 0,
+            maxVal = 1500,
+            notes = "HPP Addr82 word 0x83, /10. Over-voltage restore threshold."
         ),
         ParamDef(
             name = "LowVolProtect",
@@ -443,17 +447,25 @@ object ParamDefinitions {
         ),
         ParamDef(
             name = "MotorTempProtect",
-            addr = null,
+            addr = 0x84,
             section = SECTION_PROTECT,
+            isLoByte = true,
             unit = "°C",
-            notes = "Motor over-temp cutoff (addr in 0x82 area)"
+            minVal = 0,
+            maxVal = 250,
+            notes = "HPP Addr82 byte4 (lo of 0x84). Motor over-temp cutoff.",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "MosTempProtect",
-            addr = null,
+            addr = 0x85,
             section = SECTION_PROTECT,
+            isLoByte = true,
             unit = "°C",
-            notes = "MOSFET over-temp cutoff (addr in 0x7C area)"
+            minVal = 0,
+            maxVal = 250,
+            notes = "HPP Addr82 byte6 (lo of 0x85). MOSFET over-temp cutoff.",
+            isSafetyCritical = true
         ),
         ParamDef(
             name = "ZeroBattCoeff",
@@ -748,16 +760,16 @@ object ParamDefinitions {
             notes = "No-load run enable — addr TBD"
         ),
         ParamDef(
-            name = "Gear",
+            name = "GearConfig",
             addr = 0x1A,
             section = SECTION_FUNCTIONS,
+            isHiByte = true,       // HPP Addr18 byte5 = HI byte of word 0x1A (was isLoByte — wrong byte)
             unit = "",
             minVal = 0,
-            maxVal = 7,
+            maxVal = 5,
             bitMask = 0x07,
-            bitShift = 5,
-            isLoByte = true,
-            notes = "GearConfig bits[7:5]"
+            bitShift = 5,          // bits[5:7] of hi byte
+            notes = "HPP Addr18 byte5 bits5-7 (HI byte of 0x1A). 0=DefaultN,1=DefaultD,..."
         ),
         ParamDef(
             name = "Brake",
@@ -784,15 +796,16 @@ object ParamDefinitions {
             notes = "ParkConfig bits[6:5]"
         ),
         ParamDef(
-            name = "Cruise",
+            name = "CruiseEnable",
             addr = 0x21,
             section = SECTION_FUNCTIONS,
+            isLoByte = true,       // HPP Addr1E byte6 = LO byte of word 0x21
             unit = "",
             minVal = 0,
             maxVal = 1,
             bitMask = 0x01,
-            bitShift = 0,
-            notes = "Cruise control enable bit"
+            bitShift = 4,          // bit4 (was bit0 — wrong)
+            notes = "HPP Addr1E byte6 bit4 (lo of 0x21). XHStat / cruise enable."
         ),
         ParamDef(
             name = "Push",
@@ -806,15 +819,16 @@ object ParamDefinitions {
             notes = "Walk-push assist enable bit"
         ),
         ParamDef(
-            name = "EABS",
+            name = "EABSEnable",
             addr = 0x21,
             section = SECTION_FUNCTIONS,
+            isLoByte = true,       // HPP Addr1E byte6 = LO byte of word 0x21
             unit = "",
             minVal = 0,
             maxVal = 1,
             bitMask = 0x01,
-            bitShift = 2,
-            notes = "Electronic ABS enable bit"
+            bitShift = 5,          // bit5 (was bit2 — wrong)
+            notes = "HPP Addr1E byte6 bit5 (lo of 0x21). Electronic regen brake enable."
         ),
         ParamDef(
             name = "Follow",
@@ -827,6 +841,25 @@ object ParamDefinitions {
             bitShift = 0,
             isLoByte = true,
             notes = "FollowConfig bits[1:0]"
+        ),
+        // ---- Acceleration/deceleration limits (confirmed from HPP Addr2A block) ----
+        ParamDef(
+            name = "MaxAcc",
+            addr = 0x2F,
+            section = SECTION_FUNCTIONS,
+            unit = "",
+            minVal = 0,
+            maxVal = 9999,
+            notes = "HPP Addr2A word 0x2F. Maximum acceleration rate."
+        ),
+        ParamDef(
+            name = "MaxDec",
+            addr = 0x2B,
+            section = SECTION_FUNCTIONS,
+            unit = "",
+            minVal = 0,
+            maxVal = 9999,
+            notes = "HPP Addr2A word 0x2B. Maximum deceleration rate."
         )
     )
 
@@ -847,10 +880,48 @@ object ParamDefinitions {
         ),
         ParamDef(name = "SpeedoMeter", addr = null, section = SECTION_DISPLAY, notes = "Speedometer type — addr TBD"),
         ParamDef(name = "CAN", addr = null, section = SECTION_DISPLAY, notes = "CAN bus config — addr TBD"),
-        ParamDef(name = "WheelRatio", addr = null, section = SECTION_DISPLAY, notes = "Wheel gear ratio — addr TBD"),
+        // ---- HPP AddrD0 block: wheel/speed display config (confirmed from fardriver.hpp) ----
+        // speed = MeasureSpeed × 0.00376991136 × (WheelRadius×1270 + WheelWidth×WheelRatio) / RateRatio
+        ParamDef(
+            name = "WheelRadius",
+            addr = 0xD2,
+            section = SECTION_DISPLAY,
+            isHiByte = true,       // HPP AddrD0 byte5 (hi of 0xD2)
+            unit = "",
+            minVal = 0,
+            maxVal = 255,
+            notes = "HPP AddrD0 byte5 (hi of 0xD2). Used in speed formula."
+        ),
+        ParamDef(
+            name = "WheelWidth",
+            addr = 0xD3,
+            section = SECTION_DISPLAY,
+            isHiByte = true,       // HPP AddrD0 byte7 (hi of 0xD3)
+            unit = "",
+            minVal = 0,
+            maxVal = 255,
+            notes = "HPP AddrD0 byte7 (hi of 0xD3)."
+        ),
+        ParamDef(
+            name = "WheelRatio",
+            addr = 0xD2,
+            section = SECTION_DISPLAY,
+            isLoByte = true,       // HPP AddrD0 byte4 (lo of 0xD2)
+            unit = "",
+            minVal = 0,
+            maxVal = 255,
+            notes = "HPP AddrD0 byte4 (lo of 0xD2). Wheel gear ratio."
+        ),
+        ParamDef(
+            name = "RateRatio",
+            addr = 0xD4,
+            section = SECTION_DISPLAY,
+            unit = "",
+            minVal = 0,
+            maxVal = 9999,
+            notes = "HPP AddrD0 word 0xD4. Speed display ratio (SpeedRatio)."
+        ),
         ParamDef(name = "GearRatio", addr = null, section = SECTION_DISPLAY, notes = "Gear display ratio — addr TBD"),
-        ParamDef(name = "WheelWidth", addr = null, section = SECTION_DISPLAY, unit = "mm", notes = "Wheel width — addr TBD"),
-        ParamDef(name = "WheelR", addr = null, section = SECTION_DISPLAY, unit = "mm", notes = "Wheel radius — addr TBD"),
         ParamDef(name = "Step", addr = null, section = SECTION_DISPLAY, notes = "Step size — addr TBD"),
         ParamDef(name = "SpecialFrame", addr = null, section = SECTION_DISPLAY, notes = "Special frame mode — addr TBD"),
         ParamDef(
@@ -948,23 +1019,25 @@ object ParamDefinitions {
             name = "CruiseEnable",
             addr = 0x21,
             section = SECTION_PRODUCT,
+            isLoByte = true,       // byte6 of Addr1E block = lo of 0x21
             unit = "",
             minVal = 0,
             maxVal = 1,
             bitMask = 0x01,
-            bitShift = 0,
-            notes = "Cruise control enable (shared with Functions)"
+            bitShift = 4,          // bit4 (was bit0 — wrong)
+            notes = "HPP Addr1E byte6 bit4 (lo of 0x21). Cruise enable."
         ),
         ParamDef(
             name = "EABSEnable",
             addr = 0x21,
             section = SECTION_PRODUCT,
+            isLoByte = true,       // byte6 of Addr1E block = lo of 0x21
             unit = "",
             minVal = 0,
             maxVal = 1,
             bitMask = 0x01,
-            bitShift = 2,
-            notes = "EABS enable (shared with Functions)"
+            bitShift = 5,          // bit5 (was bit2 — wrong)
+            notes = "HPP Addr1E byte6 bit5 (lo of 0x21). EABS enable."
         ),
         ParamDef(
             name = "PushEnable",

@@ -29,7 +29,9 @@ data class ParamDef(
     val isHiByte: Boolean = false,
     val isLoByte: Boolean = false,
     val notes: String = "",
-    val isSafetyCritical: Boolean = false
+    val isSafetyCritical: Boolean = false,
+    /** True if this param is live telemetry; write button should be hidden/disabled. */
+    val isReadOnly: Boolean = false
 ) {
     /** True if this param can be written to the controller */
     val isWritable: Boolean get() = addr != null
