@@ -2,356 +2,297 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dashboardScroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark">
+    android:background="@color/bg_dark"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/screen_padding">
+        android:paddingHorizontal="18dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="20dp">
 
-        <!-- Speed + Gear row -->
-        <RelativeLayout
+        <!-- Status row -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="4dp">
+
+            <View
+                android:id="@+id/viewConnDot"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/dash_dot" />
+
+            <TextView
+                android:id="@+id/tvConnStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="CONNECTED"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:letterSpacing="0.12" />
+
+        </LinearLayout>
+
+        <!-- Speed hero -->
+        <TextView
+            android:id="@+id/tvSpeed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0.0"
+            android:textColor="@color/pink_primary"
+            android:textSize="104sp"
+            android:textStyle="bold"
+            android:fontFeatureSettings="tnum"
+            android:includeFontPadding="false"
+            android:paddingTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvSpeedUnit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="MPH"
+            android:textColor="@color/text_secondary"
+            android:textSize="18sp"
+            android:letterSpacing="0.35" />
+
+        <!-- Gear strip (DISPLAY ONLY — reflects controller gear, not tappable) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="14dp"
+            android:paddingBottom="4dp">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:id="@+id/gearSeg0"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
                 android:orientation="vertical"
-                android:layout_centerHorizontal="true">
+                android:gravity="center"
+                android:paddingVertical="9dp"
+                android:background="@drawable/dash_gear_off">
 
-                <TextView
-                    android:id="@+id/tvSpeed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="--"
-                    android:textColor="@color/pink_primary"
-                    android:textSize="80sp"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-condensed"
-                    android:layout_gravity="center_horizontal" />
-
-                <TextView
-                    android:id="@+id/tvSpeedUnit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="mph"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="22sp"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="-12dp" />
-
+                <TextView android:id="@+id/tvGear0Num" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="P" android:textColor="@color/text_secondary" android:textSize="19sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tvGear0Sub" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="PARK" android:textColor="@color/text_hint" android:textSize="9sp" android:letterSpacing="0.18" />
             </LinearLayout>
 
-            <!-- Gear badge - top right -->
-            <TextView
-                android:id="@+id/tvGear"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:text="N"
-                android:textColor="@color/bg_dark"
-                android:textSize="28sp"
-                android:textStyle="bold"
+            <LinearLayout
+                android:id="@+id/gearSeg1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
                 android:gravity="center"
-                android:background="@color/pink_primary"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true" />
+                android:paddingVertical="9dp"
+                android:background="@drawable/dash_gear_off">
 
-        </RelativeLayout>
+                <TextView android:id="@+id/tvGear1Num" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="1" android:textColor="@color/text_secondary" android:textSize="19sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tvGear1Sub" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="ECO" android:textColor="@color/text_hint" android:textSize="9sp" android:letterSpacing="0.18" />
+            </LinearLayout>
 
-        <!-- Voltage + Current -->
+            <LinearLayout
+                android:id="@+id/gearSeg2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingVertical="9dp"
+                android:background="@drawable/dash_gear_off">
+
+                <TextView android:id="@+id/tvGear2Num" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="2" android:textColor="@color/text_secondary" android:textSize="19sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tvGear2Sub" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="MID" android:textColor="@color/text_hint" android:textSize="9sp" android:letterSpacing="0.18" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/gearSeg3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingVertical="9dp"
+                android:background="@drawable/dash_gear_off">
+
+                <TextView android:id="@+id/tvGear3Num" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="3" android:textColor="@color/text_secondary" android:textSize="19sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tvGear3Sub" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="SPORT" android:textColor="@color/text_hint" android:textSize="9sp" android:letterSpacing="0.18" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Power band -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:gravity="center_vertical"
+            android:background="@drawable/dash_card"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:layout_marginTop="10dp">
 
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="VOLTAGE"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvVoltage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--.- V"
-                        android:textColor="@color/text_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                android:orientation="vertical">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="POWER" android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.2" />
+                <TextView android:id="@+id/tvPower" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="0.0 kW" android:textColor="@color/text_primary" android:textSize="28sp" android:textStyle="bold"
+                    android:fontFeatureSettings="tnum" android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvPowerTag"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="BATTERY A"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvCurrent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--.- A"
-                        android:textColor="@color/pink_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
+                android:text="—"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp"
+                android:letterSpacing="0.18" />
 
         </LinearLayout>
 
-        <!-- Phase A Current + Phase C Current -->
+        <!-- Battery / SOC -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginTop="10dp">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PHASE A"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvAPhase"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--.- A"
-                        android:textColor="@color/orange_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PHASE C"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvCPhase"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--.- A"
-                        android:textColor="@color/orange_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="BATTERY" android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.18" />
+            <TextView android:id="@+id/tvSocPct" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="--%" android:textColor="@color/soc_green" android:textSize="15sp" android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- RPM + SOC -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="14dp"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:background="@drawable/dash_track"
+            android:weightSum="100"
+            android:layout_marginTop="6dp">
 
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="RPM"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvRpm"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="---- RPM"
-                        android:textColor="@color/text_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="SOC"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvSoc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--%"
-                        android:textColor="@color/soc_green"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
+            <View android:id="@+id/socFill" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" />
+            <View android:id="@+id/socSpacer" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="100" />
         </LinearLayout>
 
-        <!-- Controller Temp + Motor Temp -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CONTROLLER"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvControllerTemp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--°C"
-                        android:textColor="@color/text_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="8dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="MOTOR"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1" />
-                    <TextView
-                        android:id="@+id/tvMotorTemp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--°C"
-                        android:textColor="@color/text_primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
+        <!-- Stat grid -->
+        <!-- Row 1: VOLTAGE | LINE AMPS -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="12dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:layout_marginEnd="10dp" android:orientation="vertical" android:background="@drawable/dash_card"
+                android:padding="13dp" android:minHeight="78dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="VOLTAGE"
+                    android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.18" />
+                <TextView android:id="@+id/tvVoltage" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="--.- V" android:textColor="@color/text_primary" android:textSize="24sp" android:textStyle="bold"
+                    android:fontFeatureSettings="tnum" android:layout_marginTop="5dp" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:orientation="vertical" android:background="@drawable/dash_card" android:padding="13dp" android:minHeight="78dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LINE AMPS"
+                    android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.18" />
+                <TextView android:id="@+id/tvLineAmps" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="--.- A" android:textColor="@color/text_primary" android:textSize="24sp" android:textStyle="bold"
+                    android:fontFeatureSettings="tnum" android:layout_marginTop="5dp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- Disconnect button at bottom of dashboard -->
+        <!-- Row 2: PHASE AMPS | RPM -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="10dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:layout_marginEnd="10dp" android:orientation="vertical" android:background="@drawable/dash_card"
+                android:padding="13dp" android:minHeight="78dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="PHASE AMPS"
+                    android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.18" />
+                <TextView android:id="@+id/tvPhaseAmps" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="--.- A" android:textColor="@color/pink_primary" android:textSize="24sp" android:textStyle="bold"
+                    android:fontFeatureSettings="tnum" android:layout_marginTop="5dp" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:orientation="vertical" android:background="@drawable/dash_card" android:padding="13dp" android:minHeight="78dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="RPM"
+                    android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.18" />
+                <TextView android:id="@+id/tvRpm" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="----" android:textColor="@color/text_primary" android:textSize="24sp" android:textStyle="bold"
+                    android:fontFeatureSettings="tnum" android:layout_marginTop="5dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Row 3: CONTROLLER | MOTOR (with temp zone bars) -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="10dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:layout_marginEnd="10dp" android:orientation="vertical" android:background="@drawable/dash_card"
+                android:padding="13dp" android:minHeight="78dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CONTROLLER"
+                    android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.18" />
+                <TextView android:id="@+id/tvControllerTemp" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="--°C" android:textColor="@color/text_primary" android:textSize="24sp" android:textStyle="bold"
+                    android:fontFeatureSettings="tnum" android:layout_marginTop="5dp" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="6dp" android:orientation="horizontal"
+                    android:background="@drawable/dash_track_thin" android:weightSum="100" android:layout_marginTop="9dp">
+                    <View android:id="@+id/ctrlFill" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" />
+                    <View android:id="@+id/ctrlSpacer" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="100" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:orientation="vertical" android:background="@drawable/dash_card" android:padding="13dp" android:minHeight="78dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MOTOR"
+                    android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.18" />
+                <TextView android:id="@+id/tvMotorTemp" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="--°C" android:textColor="@color/text_primary" android:textSize="24sp" android:textStyle="bold"
+                    android:fontFeatureSettings="tnum" android:layout_marginTop="5dp" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="6dp" android:orientation="horizontal"
+                    android:background="@drawable/dash_track_thin" android:weightSum="100" android:layout_marginTop="9dp">
+                    <View android:id="@+id/motFill" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0" />
+                    <View android:id="@+id/motSpacer" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="100" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Disconnect -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDisconnect"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="52dp"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:text="Disconnect"
+            android:text="✕  DISCONNECT"
             android:textColor="@color/error_red"
-            app:strokeColor="@color/error_red"
-            app:strokeWidth="1dp"
-            app:icon="@android:drawable/ic_menu_close_clear_cancel"
-            app:iconTint="@color/error_red" />
+            android:letterSpacing="0.12"
+            app:cornerRadius="26dp"
+            app:strokeColor="@color/error_red" />
 
     </LinearLayout>
 
