@@ -1203,6 +1203,22 @@ object ParamDefinitions {
     // richer fields (min/max write bounds, isSafetyCritical, notes) onto matching generated
     // entries by name, so regenerating the HPP set never loses curated safety polish.
 
+    // Menu-map fields with no confirmed register yet. Kept as VISIBLE unmapped placeholders so
+    // every factory-app field shows up and can be located with the sniffer / Guided Capture.
+    // addr == null => never writable; deduped by name against real fields, so no duplicates.
+    private val menuMapPlaceholders: List<ParamDef> = listOf(
+        ParamDef(name = "AngleDetect", addr = null, section = SECTION_PARAMETERS, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "ECOAccCoeff", addr = null, section = SECTION_PARAMETERS, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "WeakResponse", addr = null, section = SECTION_PARAMETERS, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "Release Throttle", addr = null, section = SECTION_PARAMETERS, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "LowVol Way", addr = null, section = SECTION_PROTECT, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "RelayDelay", addr = null, section = SECTION_PRODUCT, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "Re Acc", addr = null, section = SECTION_PRODUCT, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "DeepWeak", addr = null, section = SECTION_PRODUCT, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "SlowDownCoeff", addr = null, section = SECTION_PRODUCT, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+        ParamDef(name = "InverseTime", addr = null, section = SECTION_PRODUCT, notes = "Menu-map field — address not yet mapped (locate with the sniffer)."),
+    )
+
     private val curatedParams: List<ParamDef> =
         parametersSection +
         ratiosSpeedSection +
@@ -1213,7 +1229,8 @@ object ParamDefinitions {
         protectSection +
         pidSection +
         productSection +
-        fixedParasSection
+        fixedParasSection +
+        menuMapPlaceholders
 
     /**
      * Per-field polish applied over the generated set. Re-running the generator never loses this.
