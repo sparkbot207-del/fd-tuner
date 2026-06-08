@@ -266,16 +266,6 @@ object ParamDefinitions {
             minVal = -32768,
             maxVal = 32767,
             notes = "Starting resonance / field-weakening advance factor (int16)"
-        ),
-        ParamDef(
-            name = "LimitSpeed",
-            addr = 0x6C,
-            section = SECTION_PARAMETERS,
-            scale = 4f,
-            unit = "RPM",
-            minVal = 0,
-            maxVal = 9999,
-            notes = "Speed limiter setpoint (Addr69 block; raw = mechanical_RPM × 4)"
         )
     )
 
@@ -649,7 +639,18 @@ object ParamDefinitions {
         ParamDef(name = "Ratio @ 2000 RPM", addr = 0x90, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio8000 ÷ 4 = 2000 RPM"),
         ParamDef(name = "Ratio @ 2125 RPM", addr = 0x90, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio8500 ÷ 4 = 2125 RPM"),
         ParamDef(name = "Ratio @ 2250 RPM", addr = 0x91, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio9000 ÷ 4 = 2250 RPM"),
-        ParamDef(name = "RatioMax",          addr = 0x91, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Maximum speed ratio (addr 0x91 hi)")
+        ParamDef(name = "RatioMax",          addr = 0x91, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Maximum speed ratio (addr 0x91 hi)"),
+        // LimitSpeed belongs at the bottom of Ratios in Speed (factory-app layout), not Parameters.
+        ParamDef(
+            name = "LimitSpeed",
+            addr = 0x6C,
+            section = SECTION_RATIOS_SPEED,
+            scale = 4f,
+            unit = "RPM",
+            minVal = 0,
+            maxVal = 9999,
+            notes = "Speed limiter / field-weakening start RPM (raw = mechanical_RPM × 4)"
+        )
     )
 
     // ---- Ratios in Gear Section ----
@@ -1306,8 +1307,10 @@ object ParamDefinitions {
     val allParams: List<ParamDef> = ALL_PARAMS
 
     val bySection: Map<String, List<ParamDef>> =
+        // Preserve authored order: curated entries appear in their declaration order (so the FW
+        // curve stays in RPM order and trailing items like LimitSpeed sit at the bottom of their
+        // section, matching the factory app), followed by generated extras (already address-ordered).
         allParams.groupBy { it.section }
-            .mapValues { (_, list) -> list.sortedWith(compareBy({ it.addr ?: Int.MAX_VALUE }, { it.bitShift })) }
 
     fun forSection(section: String): List<ParamDef> = bySection[section] ?: emptyList()
 
