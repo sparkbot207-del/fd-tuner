@@ -74,10 +74,11 @@ object ParamDefinitions {
             name = "MaxSpeed",
             addr = 0x15,
             section = SECTION_PARAMETERS,
+            scale = 4f,
             unit = "RPM",
             minVal = 0,
             maxVal = 9999,
-            notes = "Maximum motor RPM limit",
+            notes = "Maximum motor RPM limit (raw = mechanical_RPM × 4)",
             isSafetyCritical = true
         ),
         ParamDef(
@@ -174,10 +175,11 @@ object ParamDefinitions {
             name = "RatedSpeed",
             addr = 0x18,
             section = SECTION_PARAMETERS,
+            scale = 4f,
             unit = "RPM",
             minVal = 0,
             maxVal = 9999,
-            notes = "Rated (base) motor speed"
+            notes = "Rated (base) motor speed (raw = mechanical_RPM × 4)"
         ),
         ParamDef(
             name = "RatedPower",
@@ -192,10 +194,11 @@ object ParamDefinitions {
             name = "BackSpeed",
             addr = 0x28,
             section = SECTION_PARAMETERS,
+            scale = 4f,
             unit = "RPM",
             minVal = 0,
             maxVal = 9999,
-            notes = "Reverse speed limit"
+            notes = "Reverse speed limit (raw = mechanical_RPM × 4)"
         ),
         ParamDef(
             name = "MaxPhaseCurr",
@@ -229,6 +232,44 @@ object ParamDefinitions {
             maxVal = 255,
             isHiByte = true,
             notes = "Throttle high voltage threshold"
+        ),
+        // ---- Inductance / field-weakening params (Fix 6 — confirmed from live ND72680) ----
+        ParamDef(
+            name = "LD",
+            addr = 0x12,
+            section = SECTION_PARAMETERS,
+            unit = "",
+            minVal = 0,
+            maxVal = 9999,
+            notes = "D-axis inductance (weak magnetic compensation)"
+        ),
+        ParamDef(
+            name = "LQ",
+            addr = 0x1B,
+            section = SECTION_PARAMETERS,
+            unit = "",
+            minVal = 0,
+            maxVal = 9999,
+            notes = "Q-axis inductance"
+        ),
+        ParamDef(
+            name = "FAIF",
+            addr = 0x09,
+            section = SECTION_PARAMETERS,
+            unit = "",
+            minVal = -32768,
+            maxVal = 32767,
+            notes = "Starting resonance / field-weakening advance factor (int16)"
+        ),
+        ParamDef(
+            name = "LimitSpeed",
+            addr = 0x6C,
+            section = SECTION_PARAMETERS,
+            scale = 4f,
+            unit = "RPM",
+            minVal = 0,
+            maxVal = 9999,
+            notes = "Speed limiter setpoint (Addr69 block; raw = mechanical_RPM × 4)"
         )
     )
 
@@ -556,128 +597,116 @@ object ParamDefinitions {
     }
 
     // ---- Ratios in Speed Section ----
+    //
+    // PROTOCOL FACT: RPM setpoints in this curve are FIXED constants derived from the
+    // raw field name (e.g. Ratio500 ÷ 4 = 125 RPM). Only the percentage byte is stored.
+    // Addresses confirmed from fardriver.hpp and validated against a live ND72680_24_A_H9.
+    //
+    // addr 0x88 lo=RatioMin,    hi=Ratio500  (125 RPM)
+    // addr 0x89 lo=Ratio1000  (250 RPM),    hi=Ratio1500  (375 RPM)
+    // addr 0x8A lo=Ratio2000  (500 RPM),    hi=Ratio2500  (625 RPM)
+    // addr 0x8B lo=Ratio3000  (750 RPM),    hi=Ratio3500  (875 RPM)
+    // addr 0x8C lo=Ratio4000 (1000 RPM),    hi=Ratio4500 (1125 RPM)
+    // addr 0x8D lo=Ratio5000 (1250 RPM),    hi=Ratio5500 (1375 RPM)
+    // addr 0x8E lo=Ratio6000 (1500 RPM),    hi=Ratio6500 (1625 RPM)
+    // addr 0x8F lo=Ratio7000 (1750 RPM),    hi=Ratio7500 (1875 RPM)
+    // addr 0x90 lo=Ratio8000 (2000 RPM),    hi=Ratio8500 (2125 RPM)
+    // addr 0x91 lo=Ratio9000 (2250 RPM),    hi=RatioMax
 
-    private val ratiosSpeedSection = buildList {
-        // 9 RPM set points: 0x30-0x38
-        for (i in 1..9) {
-            add(
-                ParamDef(
-                    name = "Ratio${i}_RPM",
-                    addr = 0x30 + (i - 1),
-                    section = SECTION_RATIOS_SPEED,
-                    unit = "RPM",
-                    minVal = 0,
-                    maxVal = 9999,
-                    notes = "Speed curve point $i — RPM setpoint"
-                )
-            )
-        }
-        // 9 Percentage values: 0x39-0x41
-        for (i in 1..9) {
-            add(
-                ParamDef(
-                    name = "Ratio${i}_Pct",
-                    addr = 0x39 + (i - 1),
-                    section = SECTION_RATIOS_SPEED,
-                    unit = "%",
-                    minVal = 0,
-                    maxVal = 100,
-                    notes = "Speed curve point $i — current percentage"
-                )
-            )
-        }
-        add(
-            ParamDef(
-                name = "LD",
-                addr = 0x12,
-                section = SECTION_RATIOS_SPEED,
-                unit = "",
-                minVal = 0,
-                maxVal = 9999,
-                notes = "D-axis inductance compensation"
-            )
-        )
-        add(
-            ParamDef(
-                name = "LQ",
-                addr = 0x1B,
-                section = SECTION_RATIOS_SPEED,
-                unit = "",
-                minVal = 0,
-                maxVal = 9999,
-                notes = "Q-axis inductance compensation"
-            )
-        )
-        add(
-            ParamDef(
-                name = "FAIF",
-                addr = 0x09,
-                section = SECTION_RATIOS_SPEED,
-                unit = "",
-                minVal = -32768,
-                maxVal = 32767,
-                notes = "Field-weakening advance factor (int16)"
-            )
-        )
-        add(
-            ParamDef(
-                name = "LimitSpeed",
-                addr = null,
-                section = SECTION_RATIOS_SPEED,
-                unit = "RPM",
-                notes = "Field-weakening start RPM (addr TBD)"
-            )
-        )
-    }
+    private val ratiosSpeedSection = listOf(
+        ParamDef(name = "Ratio @ 0 RPM",    addr = 0x88, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "RatioMin — standstill output %"),
+        ParamDef(name = "Ratio @ 125 RPM",  addr = 0x88, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio500 ÷ 4 = 125 RPM"),
+        ParamDef(name = "Ratio @ 250 RPM",  addr = 0x89, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio1000 ÷ 4 = 250 RPM"),
+        ParamDef(name = "Ratio @ 375 RPM",  addr = 0x89, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio1500 ÷ 4 = 375 RPM"),
+        ParamDef(name = "Ratio @ 500 RPM",  addr = 0x8A, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio2000 ÷ 4 = 500 RPM"),
+        ParamDef(name = "Ratio @ 625 RPM",  addr = 0x8A, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio2500 ÷ 4 = 625 RPM"),
+        ParamDef(name = "Ratio @ 750 RPM",  addr = 0x8B, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio3000 ÷ 4 = 750 RPM"),
+        ParamDef(name = "Ratio @ 875 RPM",  addr = 0x8B, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio3500 ÷ 4 = 875 RPM"),
+        ParamDef(name = "Ratio @ 1000 RPM", addr = 0x8C, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio4000 ÷ 4 = 1000 RPM"),
+        ParamDef(name = "Ratio @ 1125 RPM", addr = 0x8C, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio4500 ÷ 4 = 1125 RPM"),
+        ParamDef(name = "Ratio @ 1250 RPM", addr = 0x8D, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio5000 ÷ 4 = 1250 RPM"),
+        ParamDef(name = "Ratio @ 1375 RPM", addr = 0x8D, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio5500 ÷ 4 = 1375 RPM"),
+        ParamDef(name = "Ratio @ 1500 RPM", addr = 0x8E, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio6000 ÷ 4 = 1500 RPM"),
+        ParamDef(name = "Ratio @ 1625 RPM", addr = 0x8E, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio6500 ÷ 4 = 1625 RPM"),
+        ParamDef(name = "Ratio @ 1750 RPM", addr = 0x8F, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio7000 ÷ 4 = 1750 RPM"),
+        ParamDef(name = "Ratio @ 1875 RPM", addr = 0x8F, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio7500 ÷ 4 = 1875 RPM"),
+        ParamDef(name = "Ratio @ 2000 RPM", addr = 0x90, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio8000 ÷ 4 = 2000 RPM"),
+        ParamDef(name = "Ratio @ 2125 RPM", addr = 0x90, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Ratio8500 ÷ 4 = 2125 RPM"),
+        ParamDef(name = "Ratio @ 2250 RPM", addr = 0x91, section = SECTION_RATIOS_SPEED, isLoByte = true,  unit = "%", minVal = 0, maxVal = 100, notes = "Ratio9000 ÷ 4 = 2250 RPM"),
+        ParamDef(name = "RatioMax",          addr = 0x91, section = SECTION_RATIOS_SPEED, isHiByte = true, unit = "%", minVal = 0, maxVal = 100, notes = "Maximum speed ratio (addr 0x91 hi)")
+    )
 
     // ---- Ratios in Gear Section ----
+    //
+    // Addr30 block (starts at 0x30, 12 bytes = 6 words):
+    //   word 0x32: lo=LowSpeedLineCurr, hi=MidSpeedLineCurr
+    //   word 0x33: lo=LowSpeedPhaseCurr, hi=MidSpeedPhaseCurr
+    // Storage format: percentage = (raw × 100) / 128
+    //   e.g. raw=51 → 40%, raw=64 → 50%, raw=77 → 60%, raw=96 → 75%
+    // Values shown as raw (0–128). Do NOT use scale=1.28f — packValue doesn’t apply
+    // scale on write, so writing a percentage directly would be wrong.
+    // TODO: add a custom display/pack lambda when the ParamDef model supports it.
 
     private val ratiosGearSection = listOf(
         ParamDef(
             name = "LowSpeedLineRatio",
-            addr = null,
+            addr = 0x32,
             section = SECTION_RATIOS_GEAR,
-            unit = "%",
-            notes = "Low gear line current ratio (addr in 0x7C area)"
+            isLoByte = true,
+            unit = "",
+            minVal = 0,
+            maxVal = 128,
+            notes = "Low gear line current ratio — raw 0–128; pct = raw×100/128. Verified: 40% → raw≈51"
+        ),
+        ParamDef(
+            name = "MidSpeedLineRatio",
+            addr = 0x32,
+            section = SECTION_RATIOS_GEAR,
+            isHiByte = true,
+            unit = "",
+            minVal = 0,
+            maxVal = 128,
+            notes = "Mid gear line current ratio — raw 0–128; pct = raw×100/128. Verified: 60% → raw≈77"
         ),
         ParamDef(
             name = "LowSpeedPhaseRatio",
-            addr = null,
+            addr = 0x33,
             section = SECTION_RATIOS_GEAR,
-            unit = "%",
-            notes = "Low gear phase current ratio (addr in 0x7C area)"
+            isLoByte = true,
+            unit = "",
+            minVal = 0,
+            maxVal = 128,
+            notes = "Low gear phase current ratio — raw 0–128; pct = raw×100/128. Verified: 50% → raw=64"
+        ),
+        ParamDef(
+            name = "MidSpeedPhaseRatio",
+            addr = 0x33,
+            section = SECTION_RATIOS_GEAR,
+            isHiByte = true,
+            unit = "",
+            minVal = 0,
+            maxVal = 128,
+            notes = "Mid gear phase current ratio — raw 0–128; pct = raw×100/128. Verified: 75% → raw=96"
         ),
         ParamDef(
             name = "LowSpeed",
             addr = 0x29,
             section = SECTION_RATIOS_GEAR,
+            scale = 4f,
             unit = "RPM",
             minVal = 0,
             maxVal = 9999,
-            notes = "Low gear speed limit"
-        ),
-        ParamDef(
-            name = "MidSpeedLineRatio",
-            addr = null,
-            section = SECTION_RATIOS_GEAR,
-            unit = "%",
-            notes = "Mid gear line current ratio (addr in 0x82 area)"
-        ),
-        ParamDef(
-            name = "MidSpeedPhaseRatio",
-            addr = null,
-            section = SECTION_RATIOS_GEAR,
-            unit = "%",
-            notes = "Mid gear phase current ratio (addr in 0x82 area)"
+            notes = "Low gear speed limit (raw = mechanical_RPM × 4). Verified: 750 RPM → raw=3000"
         ),
         ParamDef(
             name = "MidSpeed",
             addr = 0x2A,
             section = SECTION_RATIOS_GEAR,
+            scale = 4f,
             unit = "RPM",
             minVal = 0,
             maxVal = 9999,
-            notes = "Mid gear speed limit"
+            notes = "Mid gear speed limit (raw = mechanical_RPM × 4). Verified: 1500 RPM → raw=6000"
         )
     )
 

@@ -149,10 +149,14 @@ object FardriverProtocol {
     /**
      * Decode live telemetry fields from the raw param map.
      * Word addresses come from spec: 0xE2 block (id=0,7,14,21,28,35,42,48).
+     *
+     * RPM note: FarDriver stores ALL RPM values as raw = mechanical_RPM × 4.
+     * This is a fixed protocol constant (NOT eRPM). Divide raw by 4 for mechanical RPM.
+     * polePairs is kept in the signature for API compatibility but is NOT used here.
      */
     fun decodeTelemetry(
         rawParams: Map<Int, Int>,
-        polePairs: Int,
+        @Suppress("UNUSED_PARAMETER") polePairs: Int,
         wheelCircumferenceMm: Int,
         useMph: Boolean
     ): TelemetryData {
@@ -163,7 +167,8 @@ object FardriverProtocol {
         val lineCurrent = lineCurrentRaw.toShort() / 10.0f
 
         val rpmRaw = rawParams[0xE5] ?: 0
-        val rpm = rpmRaw // unsigned
+        // raw = mechanical_RPM × 4 → convert to mechanical RPM for display
+        val mechanicalRpm = rpmRaw / 4
 
         val gearRaw = rawParams[0xE6] ?: 0
         val gear = gearRaw and 0xFF
@@ -177,12 +182,8 @@ object FardriverProtocol {
         val socRaw = rawParams[0xEA] ?: 0
         val soc = socRaw and 0xFF
 
-        // Speed = (RPM / polePairs) * wheelCircumference_m * 60 / 1000 = km/h
-        val speedKmh = if (polePairs > 0) {
-            (rpm.toDouble() / polePairs) * (wheelCircumferenceMm.toDouble() / 1000.0) * 60.0 / 1000.0
-        } else {
-            0.0
-        }
+        // Speed: raw / 4 = mechanical_RPM; wheel speed = mechanical_RPM × circumference
+        val speedKmh = mechanicalRpm * (wheelCircumferenceMm.toDouble() / 1000.0) * 60.0 / 1000.0
         val speed = if (useMph) (speedKmh * 0.621371).toFloat() else speedKmh.toFloat()
 
         val gearName = when (gear) {
@@ -196,7 +197,7 @@ object FardriverProtocol {
         return TelemetryData(
             voltage = voltage,
             lineCurrent = lineCurrent,
-            rpm = rpm,
+            rpm = mechanicalRpm,
             gear = gearName,
             controllerTemp = controllerTemp,
             motorTemp = motorTemp,

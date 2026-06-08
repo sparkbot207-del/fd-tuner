@@ -29,14 +29,15 @@ object DemoDataSource {
         0x0C to 0,           // PhaseOffset: 0°
         0x0B to 0x0000,      // Motor Direction: normal, TempSensor: NTC10K(6)
         0x17 to 720,         // RatedVoltage: 72.0V
-        0x15 to 5000,        // MaxSpeed: 5000 RPM
+        // RPM params: raw = mechanical_RPM × 4 (FarDriver fixed protocol constant)
+        0x15 to 20000,       // MaxSpeed: 5000 RPM × 4 = 20000 raw
         0x19 to (280 * 4),   // MaxLineCurr: 280A (raw = 280*4 = 1120)
         0x1A to 0x0001,      // ThrottleResponse: Sport
         0x26 to (300 * 4),   // BoostLineCurr: 300A
         0x14 to 23,          // PolePairs: 23 (QS205)
-        0x18 to 3500,        // RatedSpeed: 3500 RPM
+        0x18 to 14000,       // RatedSpeed: 3500 RPM × 4 = 14000 raw
         0x16 to 8000,        // RatedPower: 8000W
-        0x28 to 800,         // BackSpeed: 800 RPM
+        0x28 to 3200,        // BackSpeed: 800 RPM × 4 = 3200 raw
         0x2D to (680 * 4),   // MaxPhaseCurr: 680A (72680 = 680A phase)
         0x27 to (700 * 4),   // BoostPhaseCurr: 700A
         0x08 to (( (210) shl 8) or 80), // ThrottleHigh: 210/20=10.5V, ThrottleLow: 80/20=4.0V
@@ -62,8 +63,8 @@ object DemoDataSource {
         // Ratios in Speed / Gear
         0x1B to 800,         // LQ: 800
         0x09 to 0,           // FAIF: 0
-        0x29 to 1500,        // LowSpeed: 1500 RPM
-        0x2A to 3000,        // MidSpeed: 3000 RPM
+        0x29 to 6000,        // LowSpeed: 1500 RPM × 4 = 6000 raw
+        0x2A to 12000,       // MidSpeed: 3000 RPM × 4 = 12000 raw
 
         // Product / Functions
         0x21 to 0b00110101,  // CruiseEnable, PEnable, EABSEnable, BCState
@@ -109,10 +110,10 @@ object DemoDataSource {
                 val ctrlTemp = (38 + phase * 18 + sin(t * 0.05) * 2).toInt()
                 val motorTemp = (45 + phase * 22 + sin(t * 0.04) * 3).toInt()
 
-                // Speed from RPM: (RPM / polePairs) * circumference * 60 / 1000 / 1.609
-                val polePairs = 23
-                val circumM = 2.1
-                val speedKmh = (rpm.toDouble() / polePairs) * circumM * 60.0 / 1000.0
+                // Speed: raw protocol value = mechanical_RPM × 4, so divide by 4.
+                // In demo simulation, rpm is mechanical RPM directly — use same formula.
+                val circumM = 2.1  // metres (2100mm typical wheel circumference)
+                val speedKmh = rpm.toDouble() * circumM * 60.0 / 1000.0
                 val speedMph = speedKmh * 0.621371
 
                 val gearStr = when (gear) { 0 -> "N"; 1 -> "L"; 2 -> "M"; else -> "H" }

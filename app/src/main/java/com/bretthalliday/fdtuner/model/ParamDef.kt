@@ -75,17 +75,15 @@ data class ParamDef(
         }
     }
 
-    /** Format the display value as a string with unit */
+    /**
+     * Format the display value as a string WITHOUT unit.
+     * The unit label is shown separately by the tvParamUnit TextView in the layout
+     * to avoid double-suffix (e.g. "3000 RPM RPM").
+     */
     fun formatDisplay(rawWord: Int?): String {
         if (rawWord == null) return "—"
         val extracted = extractValue(rawWord)
-        return if (scale != 1f) {
-            val display = extracted / scale
-            if (unit.isEmpty()) "%.1f".format(display)
-            else "%.1f $unit".format(display)
-        } else {
-            if (unit.isEmpty()) "$extracted"
-            else "$extracted $unit"
-        }
+        return if (scale != 1f) "%.1f".format(extracted / scale)
+        else "$extracted"
     }
 }
