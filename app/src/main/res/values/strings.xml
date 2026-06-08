@@ -30,6 +30,6 @@
     <string name="about_safety_title">Safety</string>
     <string name="about_safety">This controls a high-power motor system. Always put the rear wheel on a stand, clear of people and obstructions, before changing parameters or running throttle captures. Incorrect current, voltage, or field-weakening settings can damage your controller, motor, or battery. Change one parameter at a time and verify. Use at your own risk.</string>
     <string name="about_credits_title">Protocol &amp; credits</string>
-    <string name="about_credits">Parameter and telemetry decoding is based on the community reverse-engineering of the FarDriver BLE protocol, in particular the jackhumbert/fardriver-controllers field map and the Endless-Sphere community. Not affiliated with, endorsed by, or supported by FarDriver/NanJing FarDriver Controller Co.</string>
-    <string name="about_built_by">Built by Brett Halliday.</string>
+    <string name="about_credits">Not affiliated with, endorsed by, or supported by FarDriver/NanJing FarDriver Controller Co.</string>
+    <string name="about_built_by">Built by Brett Halliday 2026.</string>
 </resources>
