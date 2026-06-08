@@ -9,8 +9,10 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bretthalliday.fdtuner.BuildConfig
 import com.bretthalliday.fdtuner.MainActivity
+import com.bretthalliday.fdtuner.R
 import com.bretthalliday.fdtuner.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {
@@ -108,6 +110,20 @@ class SettingsFragment : Fragment() {
             text?.toString()?.toFloatOrNull()?.let { v ->
                 if (v in 20.0f..120.0f) prefs.edit().putFloat("alert_batt_low", v).apply()
             }
+        }
+
+        // ---- Developer mode ----
+        val devMode = prefs.getBoolean("dev_mode", false)
+        binding.switchDevMode.isChecked = devMode
+        binding.btnOpenSniffer.visibility = if (devMode) View.VISIBLE else View.GONE
+
+        binding.switchDevMode.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("dev_mode", isChecked).apply()
+            binding.btnOpenSniffer.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+
+        binding.btnOpenSniffer.setOnClickListener {
+            findNavController().navigate(R.id.action_settings_to_sniffer)
         }
 
         // ---- About ----

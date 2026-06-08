@@ -24,6 +24,7 @@ import com.bretthalliday.fdtuner.databinding.ActivityMainBinding
 import com.bretthalliday.fdtuner.ui.dashboard.DashboardViewModel
 import com.bretthalliday.fdtuner.ui.params.ParamsViewModel
 import com.bretthalliday.fdtuner.ui.scan.ScanViewModel
+import com.bretthalliday.fdtuner.ui.sniffer.SnifferViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
@@ -213,6 +214,8 @@ class MainActivity : AppCompatActivity() {
                         DashboardViewModel(bleManager) as T
                     modelClass.isAssignableFrom(ParamsViewModel::class.java) ->
                         ParamsViewModel(application, bleManager) as T
+                    modelClass.isAssignableFrom(SnifferViewModel::class.java) ->
+                        SnifferViewModel(bleManager) as T
                     else -> super.create(modelClass)
                 }
             }

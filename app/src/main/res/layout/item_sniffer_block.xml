@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row in the sniffer block list.
+     Shows the block base address and all 6 word values in compact monospace.
+     Background is set programmatically to flash orange when words change. -->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardBlock"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="3dp"
+    app:cardBackgroundColor="@color/bg_surface"
+    app:cardCornerRadius="6dp"
+    app:cardElevation="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="10dp"
+        android:gravity="center_vertical">
+
+        <!-- Block base address label -->
+        <TextView
+            android:id="@+id/tvBlockAddr"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/cyan_accent"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:text="0x00" />
+
+        <!-- Word values: two lines, 3 words each.
+             Shown as "ADDR:HHHH(DDDDD)" in monospace. -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Words 0-2 -->
+            <TextView
+                android:id="@+id/tvWords03"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:singleLine="true"
+                android:text="xx:---- xx:---- xx:----" />
+
+            <!-- Words 3-5 -->
+            <TextView
+                android:id="@+id/tvWords36"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                android:fontFamily="monospace"
+                android:singleLine="true"
+                android:text="xx:---- xx:---- xx:----" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

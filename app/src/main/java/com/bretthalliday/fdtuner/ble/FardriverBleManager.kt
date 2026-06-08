@@ -7,7 +7,9 @@ import android.os.ParcelUuid
 import android.util.Log
 import com.bretthalliday.fdtuner.model.TelemetryData
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -49,6 +51,10 @@ class FardriverBleManager(private val context: Context) {
 
     private val _scannedDevices = MutableStateFlow<List<ScannedDevice>>(emptyList())
     val scannedDevices: StateFlow<List<ScannedDevice>> = _scannedDevices
+
+    // ---- Packet sniffer stream (read-only; never triggers a write) ----
+    private val _sniffPackets = MutableSharedFlow<SniffPacket>(replay = 0, extraBufferCapacity = 256)
+    val sniffPackets: SharedFlow<SniffPacket> = _sniffPackets
 
     private val _rawParams = MutableStateFlow<Map<Int, Int>>(emptyMap())
     val rawParams: StateFlow<Map<Int, Int>> = _rawParams
@@ -388,6 +394,21 @@ class FardriverBleManager(private val context: Context) {
             snapshot, polePairs, wheelCircumferenceMm, useMph
         )
         _telemetry.value = telData
+
+        // Emit sniffer packet — tryEmit so the BLE callback is never blocked
+        val id = data[1].toInt() and 0x3F
+        if (id < FardriverProtocol.flashReadAddr.size) {
+            val rawHex = data.joinToString(" ") { "%02X".format(it.toInt() and 0xFF) }
+            _sniffPackets.tryEmit(
+                SniffPacket(
+                    timestampMs = System.currentTimeMillis(),
+                    id = id,
+                    baseAddr = FardriverProtocol.flashReadAddr[id],
+                    rawHex = rawHex,
+                    words = words
+                )
+            )
+        }
     }
 
     // ---- Bulk write (profile load) ----
@@ -428,6 +449,33 @@ class FardriverBleManager(private val context: Context) {
         }
         scope.launch {
             DemoDataSource.rawParams.collect { _rawParams.value = it }
+        }
+        // Synthesise sniff packets from demo raw params so the sniffer works in demo mode.
+        // Each rawParams update emits one packet per unique block base that has any data.
+        scope.launch {
+            val uniqueBases = FardriverProtocol.flashReadAddr.toSortedSet()
+            DemoDataSource.rawParams.collect { params ->
+                if (params.isEmpty()) return@collect
+                uniqueBases.forEach { base ->
+                    val words = mutableMapOf<Int, Int>()
+                    for (offset in 0..5) {
+                        val addr = base + offset
+                        params[addr]?.let { words[addr] = it }
+                    }
+                    if (words.isNotEmpty()) {
+                        val idx = FardriverProtocol.flashReadAddr.indexOf(base)
+                        _sniffPackets.tryEmit(
+                            SniffPacket(
+                                timestampMs = System.currentTimeMillis(),
+                                id = if (idx >= 0) idx else 0,
+                                baseAddr = base,
+                                rawHex = "-- demo mode --",
+                                words = words
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 

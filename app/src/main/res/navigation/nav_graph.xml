@@ -61,7 +61,14 @@
         android:id="@+id/settingsFragment"
         android:name="com.bretthalliday.fdtuner.settings.SettingsFragment"
         android:label="Settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_settings_to_sniffer"
+            app:destination="@id/snifferFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
 
     <!-- Profiles (bottom nav tab 4) -->
     <fragment
@@ -76,5 +83,33 @@
         android:name="com.bretthalliday.fdtuner.ui.errors.ErrorCodesFragment"
         android:label="Error Codes"
         tools:layout="@layout/fragment_error_codes" />
+
+    <!-- Packet Sniffer — dev mode only; entered from Settings -->
+    <fragment
+        android:id="@+id/snifferFragment"
+        android:name="com.bretthalliday.fdtuner.ui.sniffer.SnifferFragment"
+        android:label="Packet Sniffer"
+        tools:layout="@layout/fragment_sniffer">
+
+        <action
+            android:id="@+id/action_snifferFragment_to_snifferDetailFragment"
+            app:destination="@id/snifferDetailFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+
+    <!-- Sniffer block detail -->
+    <fragment
+        android:id="@+id/snifferDetailFragment"
+        android:name="com.bretthalliday.fdtuner.ui.sniffer.SnifferDetailFragment"
+        android:label="Block Detail"
+        tools:layout="@layout/fragment_sniffer_detail">
+
+        <argument
+            android:name="baseAddr"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+
 
 </navigation>
